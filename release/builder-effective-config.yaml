@@ -1,0 +1,33 @@
+directories:
+  output: release
+  buildResources: build
+appId: com.jordan.homeplanner
+productName: Home Planner
+copyright: Copyright © 2026
+artifactName: ${productName}-${version}-${arch}.${ext}
+files:
+  - filter:
+      - out/**/*
+      - package.json
+asar: true
+asarUnpack:
+  - '**/node_modules/node-html-parser/**'
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Home Planner
+  runAfterFinish: true
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+electronVersion: 34.5.8

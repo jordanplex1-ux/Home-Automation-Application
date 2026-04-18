@@ -1,0 +1,17 @@
+export const IPC = {
+  STORE_GET: 'store:get',
+  STORE_SET: 'store:set',
+  STORE_DELETE: 'store:delete',
+  BINS_FETCH_BARNSLEY: 'bins:fetch-barnsley',
+  WINDOW_TOGGLE_FULLSCREEN: 'window:toggle-fullscreen',
+  AUTOSTART_GET: 'autostart:get',
+  AUTOSTART_SET: 'autostart:set',
+  BACKUP_EXPORT: 'backup:export',
+  BACKUP_RESTORE: 'backup:restore',
+  BACKUP_SCHEDULE_GET: 'backup:schedule-get',
+  BACKUP_SCHEDULE_SET: 'backup:schedule-set',
+  BACKUP_PICK_FOLDER: 'backup:pick-folder',
+  UPDATER_CHECK: 'updater:check',
+  UPDATER_INSTALL_NOW: 'updater:install-now',
+  UPDATER_STATUS: 'updater:status'
+} as const

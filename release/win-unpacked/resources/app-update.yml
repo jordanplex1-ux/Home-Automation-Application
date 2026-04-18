@@ -1,0 +1,5 @@
+owner: REPLACE_ME_GITHUB_OWNER
+repo: REPLACE_ME_GITHUB_REPO
+provider: github
+releaseType: release
+updaterCacheDirName: home-planner-updater

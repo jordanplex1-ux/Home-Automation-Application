@@ -1,0 +1,54 @@
+appId: com.jordan.homeplanner
+productName: Home Planner
+copyright: Copyright © 2026
+artifactName: ${productName}-${version}-${arch}.${ext}
+
+directories:
+  output: release
+  buildResources: build
+
+files:
+  - out/**/*
+  - package.json
+
+asar: true
+asarUnpack:
+  - "**/node_modules/node-html-parser/**"
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  # Icon is optional. Drop a 256x256 .ico into ./build/icon.ico to use a custom one.
+  # icon: build/icon.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Home Planner
+  runAfterFinish: true
+  # Upgrade behaviour: keep user data (events, widgets, backups) on uninstall
+  # so in-place upgrades never wipe the user's config.
+  deleteAppDataOnUninstall: false
+  # Emit a blockmap + diff manifest so future auto-update can do delta downloads.
+  differentialPackage: true
+
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+
+# Auto-update feed. Replace owner/repo with your actual GitHub repository
+# before running: `npm run package:win -- --publish always` (requires GH_TOKEN env var).
+# If you never publish, nothing here is uploaded — it only affects where the
+# installed app looks for update metadata at runtime.
+publish:
+  - provider: github
+    owner: REPLACE_ME_GITHUB_OWNER
+    repo: REPLACE_ME_GITHUB_REPO
+    releaseType: release
