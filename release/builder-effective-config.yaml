@@ -28,6 +28,13 @@ nsis:
   createStartMenuShortcut: true
   shortcutName: Home Planner
   runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  differentialPackage: true
 portable:
   artifactName: ${productName}-${version}-portable.${ext}
+publish:
+  - provider: github
+    owner: jordanplex1-ux
+    repo: Home-Automation-Application
+    releaseType: release
 electronVersion: 34.5.8

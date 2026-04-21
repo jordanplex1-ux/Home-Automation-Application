@@ -1,0 +1,5 @@
+owner: jordanplex1-ux
+repo: Home-Automation-Application
+provider: github
+releaseType: release
+updaterCacheDirName: home-planner-updater

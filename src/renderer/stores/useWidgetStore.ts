@@ -97,7 +97,16 @@ export const useWidgetStore = create<WidgetState>()(
       storage: createJSONStorage(() => electronStorage),
       partialize: (state) => ({
         instances: state.instances
-      })
+      }),
+      // Drop any persisted instance whose widgetId is no longer registered
+      // (e.g. the removed Placeholder widget). Leaves valid widgets untouched.
+      onRehydrateStorage: () => (state) => {
+        if (!state) return
+        const valid = state.instances.filter((i) => getWidget(i.widgetId) !== undefined)
+        if (valid.length !== state.instances.length) {
+          state.instances = valid
+        }
+      }
     }
   )
 )

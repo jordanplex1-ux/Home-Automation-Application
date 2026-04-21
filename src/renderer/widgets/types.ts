@@ -10,6 +10,12 @@ export interface WidgetDefinition {
   defaultConfig: Record<string, unknown>
   defaultLayout: { w: number; h: number; minW?: number; minH?: number }
   refreshInterval?: number
+  /**
+   * Root segments of any TanStack Query keys this widget owns. Used by the
+   * per-widget refresh button in edit mode to invalidate just this widget's
+   * queries. Omit for widgets with no live data (e.g. todo, day planner).
+   */
+  queryKeyPrefixes?: readonly string[]
   category: 'core' | 'info' | 'utility'
 }
 

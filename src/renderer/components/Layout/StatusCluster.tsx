@@ -27,7 +27,7 @@ export function StatusCluster() {
 
   return (
     <div className="flex items-center gap-3 text-text-disabled text-xs">
-      <span>Home Planner v0.1.0</span>
+      <span>Home Planner v{__APP_VERSION__}</span>
       <span className="w-px h-4 bg-border-subtle" />
       <div className="flex items-center gap-1.5" title={online ? 'Online' : 'Offline'}>
         {online ? (

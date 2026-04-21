@@ -1,5 +1,7 @@
 /// <reference types="vite/client" />
 
+declare const __APP_VERSION__: string
+
 interface BinCollection {
   type: string
   collectionDate: string
@@ -33,6 +35,28 @@ interface ElectronAPI {
     installNow: () => Promise<void>
     onStatus: (cb: (status: UpdateStatus) => void) => () => void
   }
+  photos: {
+    pickFolder: () => Promise<string | null>
+    list: (folder: string) => Promise<string[]>
+    read: (path: string) => Promise<string | null>
+  }
+  news: {
+    fetch: (sourceIds: string[]) => Promise<NewsHeadline[]>
+    sources: () => Promise<NewsSource[]>
+  }
+}
+
+interface NewsHeadline {
+  title: string
+  source: string
+  link: string
+  pubDate: number
+}
+
+interface NewsSource {
+  id: string
+  label: string
+  url: string
 }
 
 type UpdateStatus =

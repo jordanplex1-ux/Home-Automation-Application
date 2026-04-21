@@ -144,8 +144,12 @@ export const useCalendarStore = create<CalendarState>()(
       },
 
       removeEvent: (id) => {
+        // Multi-day/recurring events are rendered as clones with ids of the
+        // form `<baseId>_YYYY-MM-DD`. Strip that suffix so deletes apply to
+        // the underlying stored event rather than becoming a no-op.
+        const baseId = /^(.*)_\d{4}-\d{2}-\d{2}$/.exec(id)?.[1] ?? id
         set((state) => ({
-          events: state.events.filter((e) => e.id !== id)
+          events: state.events.filter((e) => e.id !== id && e.id !== baseId)
         }))
       },
 
@@ -160,13 +164,20 @@ export const useCalendarStore = create<CalendarState>()(
         const year = parseInt(date.split('-')[0])
         const holidays = getHolidaysForYear(year).filter((h) => h.date === date)
         const recurring = expandRecurringForDate(state.recurringEvents, date)
-        // Include single-day events on that day AND multi-day events whose span contains the date
-        const regular = state.events.filter((e) => {
+        // Single-day events on that exact date, PLUS multi-day events whose
+        // span contains the date — cloned so their `date` reflects the day
+        // they're being rendered on (otherwise MonthView groups every copy
+        // onto the original start date).
+        const regular: CalendarEvent[] = []
+        for (const e of state.events) {
           if (e.endDate && e.endDate >= e.date) {
-            return date >= e.date && date <= e.endDate
+            if (date >= e.date && date <= e.endDate) {
+              regular.push({ ...e, id: `${e.id}_${date}`, date })
+            }
+          } else if (e.date === date) {
+            regular.push(e)
           }
-          return e.date === date
-        })
+        }
         return [...holidays, ...recurring, ...regular]
       }
     }),

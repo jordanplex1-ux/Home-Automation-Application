@@ -1,6 +1,6 @@
 {
   "name": "home-planner",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "description": "Touchscreen home planner dashboard for wall-mounted displays",
   "main": "./out/main/index.js",
   "scripts": {
@@ -8,6 +8,7 @@
     "build": "electron-vite build",
     "package:win": "electron-vite build && electron-builder --win --config electron-builder.yml",
     "package:win:dir": "electron-vite build && electron-builder --win --dir --config electron-builder.yml",
+    "release": "electron-vite build && electron-builder --win --config electron-builder.yml --publish always",
     "typecheck": "tsc --noEmit"
   },
   "author": "Jordan",
@@ -21,6 +22,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-grid-layout": "^1.5.0",
+    "rss-parser": "^3.13.0",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

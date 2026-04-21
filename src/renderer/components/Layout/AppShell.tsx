@@ -13,6 +13,7 @@ import { WidgetPicker } from '../Widget/WidgetPicker'
 import { WidgetSettingsModal } from '../Widget/WidgetSettingsModal'
 import { useWidgetStore } from '../../stores/useWidgetStore'
 import { useAppSettingsStore } from '../../stores/useAppSettingsStore'
+import { useInactivityTimer } from '../../hooks/useInactivityTimer'
 import { IconButton } from '../ui/IconButton'
 import { Toaster } from '../ui/Toaster'
 import { toast } from '../../stores/useToastStore'
@@ -22,12 +23,23 @@ export function AppShell() {
   const setEditing = useWidgetStore((s) => s.setEditing)
   // Initialize app settings store (applies persisted accent on rehydrate)
   useAppSettingsStore((s) => s.accentName)
+  const autoDimEnabled = useAppSettingsStore((s) => s.autoDimEnabled)
+  const autoDimMinutes = useAppSettingsStore((s) => s.autoDimMinutes)
   const queryClient = useQueryClient()
 
   const [pickerOpen, setPickerOpen] = useState(false)
   const [appSettingsOpen, setAppSettingsOpen] = useState(false)
   const [shortcutHelpOpen, setShortcutHelpOpen] = useState(false)
   const [dimmed, setDimmed] = useState(false)
+
+  // Auto-dim after inactivity. Pause when already dimmed so the timer doesn't
+  // fire behind the overlay (and we don't restart the timer on the tap-to-wake
+  // event — that's what sets dimmed back to false).
+  useInactivityTimer(
+    autoDimMinutes * 60 * 1000,
+    () => setDimmed(true),
+    autoDimEnabled && !dimmed
+  )
 
   // Keyboard shortcuts
   useEffect(() => {

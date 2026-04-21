@@ -6,6 +6,8 @@ import { setupWindowIPC } from './window'
 import { setupAutostartIPC } from './autostart'
 import { setupBackupIPC } from './backup'
 import { setupUpdater } from './updater'
+import { setupPhotosIPC } from './photos'
+import { setupNewsIPC } from './news'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -52,6 +54,8 @@ app.whenReady().then(() => {
   setupAutostartIPC()
   setupBackupIPC()
   setupUpdater()
+  setupPhotosIPC()
+  setupNewsIPC()
   createWindow()
 })
 

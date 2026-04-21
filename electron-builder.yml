@@ -43,12 +43,11 @@ nsis:
 portable:
   artifactName: ${productName}-${version}-portable.${ext}
 
-# Auto-update feed. Replace owner/repo with your actual GitHub repository
-# before running: `npm run package:win -- --publish always` (requires GH_TOKEN env var).
-# If you never publish, nothing here is uploaded — it only affects where the
-# installed app looks for update metadata at runtime.
+# Auto-update feed. Public GitHub repo — installed clients read releases
+# anonymously, no token needed at runtime. Publishing a release from this
+# machine requires GH_TOKEN env var with `repo` scope.
 publish:
   - provider: github
-    owner: REPLACE_ME_GITHUB_OWNER
-    repo: REPLACE_ME_GITHUB_REPO
+    owner: jordanplex1-ux
+    repo: Home-Automation-Application
     releaseType: release

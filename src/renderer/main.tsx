@@ -4,10 +4,11 @@ import { App } from './App'
 import './styles/globals.css'
 
 // Register widgets
-import './widgets/placeholder'
 import './widgets/day-planner'
 import './widgets/weather'
 import './widgets/bins'
+import './widgets/todo'
+import './widgets/news'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

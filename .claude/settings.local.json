@@ -22,7 +22,22 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(npm uninstall:*)",
       "Bash(npm run *)",
-      "Bash(npm i *)"
+      "Bash(npm i *)",
+      "Bash(taskkill /F /IM \"Home Planner.exe\")",
+      "Bash(cmd //c \"taskkill /F /IM \\\\\"Home Planner.exe\\\\\"\")",
+      "Bash(powershell -Command \"Get-Process -Name 'Home Planner' -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(powershell -Command \"Remove-Item -Recurse -Force '.\\\\release\\\\win-unpacked' -ErrorAction SilentlyContinue; 'ok'\")",
+      "Bash(powershell -Command 'Get-Process | Where-Object { $_.ProcessName -like '\\\\''*Home*'\\\\'' -or $_.ProcessName -like '\\\\''*electron*'\\\\'' } | Format-Table ProcessName,Id -AutoSize')",
+      "Bash(powershell -Command 'Get-Process | Where-Object { $_.ProcessName -match '\\\\''Home|electron|planner'\\\\'' } | Select-Object ProcessName,Id | Format-Table -AutoSize')",
+      "Bash(powershell -Command '\\(Get-Item '\\\\''.\\\\release\\\\win-unpacked\\\\resources\\\\app.asar'\\\\'' -ErrorAction SilentlyContinue\\) -ne $null')",
+      "Bash(powershell -Command \"Remove-Item -Force '.\\\\release\\\\win-unpacked\\\\resources\\\\app.asar' -ErrorAction Stop\")",
+      "Bash(powershell -Command '& { $handle = [System.IO.File]::Open\\('\\\\''.\\\\release\\\\win-unpacked\\\\resources\\\\app.asar'\\\\'', '\\\\''Open'\\\\'', '\\\\''Read'\\\\'', '\\\\''None'\\\\''\\); $handle.Close\\(\\) }')",
+      "Bash(cmd //c \"openfiles /query /fo table 2>&1 | findstr app.asar\")",
+      "Bash(Get-Random)",
+      "Bash(powershell -Command \"Rename-Item .\\\\release .\\\\release_old_$\\(Get-Random\\)\")",
+      "Bash(powershell -Command \"Rename-Item '.\\\\release' 'release_locked'\")",
+      "Bash(powershell -Command 'Get-Process | Where-Object { $_.Modules | Where-Object { $_.FileName -like '\\\\''*app.asar*'\\\\'' } } | Select-Object ProcessName,Id,Path')",
+      "Bash(npx electron-builder *)"
     ]
   }
 }

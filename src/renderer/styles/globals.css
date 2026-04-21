@@ -101,3 +101,42 @@ input, textarea {
 .anim-scale { animation: scale-in 220ms cubic-bezier(0.16, 1, 0.3, 1); }
 .anim-slide-up { animation: slide-up 240ms cubic-bezier(0.16, 1, 0.3, 1); }
 .anim-slide-in-right { animation: slide-in-right 220ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* Drifting motion for the dim-mode clock — 2-minute full cycle, keeps no
+   single pixel lit for long so nothing can burn in. */
+@keyframes drift {
+  0%   { transform: translate(-30vw, -20vh); }
+  25%  { transform: translate( 28vw, -22vh); }
+  50%  { transform: translate( 30vw,  24vh); }
+  75%  { transform: translate(-26vw,  22vh); }
+  100% { transform: translate(-30vw, -20vh); }
+}
+.anim-drift { animation: drift 120s ease-in-out infinite; }
+
+/* Sub-pixel-to-2px whole-screen shift when burn-in protection is enabled.
+   A 5-minute cycle is imperceptible during use but guarantees static UI
+   elements never sit on the same pixels for long periods. */
+@keyframes burn-in-shift {
+  0%   { transform: translate(0, 0); }
+  20%  { transform: translate(2px, 1px); }
+  40%  { transform: translate(-1px, 2px); }
+  60%  { transform: translate(-2px, -1px); }
+  80%  { transform: translate(1px, -2px); }
+  100% { transform: translate(0, 0); }
+}
+html.anti-burn-in body { animation: burn-in-shift 300s linear infinite; }
+
+/* News ticker — continuous leftward scroll. The content is duplicated twice
+   in the DOM so translateX(-50%) lands exactly on the second copy's start,
+   giving a seamless loop regardless of content width. Duration is set via a
+   CSS variable from the component so the scroll speed can be configured. */
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.anim-ticker {
+  animation: ticker-scroll var(--ticker-duration, 60s) linear infinite;
+}
+.anim-ticker-paused {
+  animation-play-state: paused;
+}

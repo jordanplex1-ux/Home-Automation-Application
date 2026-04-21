@@ -10,8 +10,9 @@ registerWidget({
   icon: CloudSun,
   component: WeatherWidget,
   settingsComponent: WeatherSettings,
-  defaultConfig: { apiKey: '', lat: '', lon: '' },
+  defaultConfig: { apiKey: '', lat: '', lon: '', showAirQuality: true },
   defaultLayout: { w: 4, h: 3, minW: 3, minH: 2 },
   refreshInterval: 15 * 60 * 1000,
+  queryKeyPrefixes: ['weather', 'air-quality'],
   category: 'info'
 })

@@ -63,6 +63,19 @@ export const ACCENT_PRESETS: AccentPreset[] = [
 interface AppSettingsState {
   accentName: string
   setAccent: (name: string) => void
+  autoDimEnabled: boolean
+  autoDimMinutes: number        // inactivity timeout in minutes
+  burnInProtection: boolean
+  setAutoDimEnabled: (enabled: boolean) => void
+  setAutoDimMinutes: (minutes: number) => void
+  setBurnInProtection: (enabled: boolean) => void
+  // Photo frame (takes over the dim overlay when enabled)
+  photoFrameEnabled: boolean
+  photoFrameFolder: string | null
+  photoFrameIntervalSec: number  // seconds between photo changes
+  setPhotoFrameEnabled: (enabled: boolean) => void
+  setPhotoFrameFolder: (folder: string | null) => void
+  setPhotoFrameIntervalSec: (seconds: number) => void
 }
 
 function applyAccent(name: string) {
@@ -76,6 +89,12 @@ function applyAccent(name: string) {
   root.style.setProperty('--color-border-glow', preset.borderGlow)
 }
 
+function applyBurnInProtection(enabled: boolean) {
+  const root = document.documentElement
+  if (enabled) root.classList.add('anti-burn-in')
+  else root.classList.remove('anti-burn-in')
+}
+
 export const useAppSettingsStore = create<AppSettingsState>()(
   persist(
     (set) => ({
@@ -83,13 +102,33 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       setAccent: (name) => {
         applyAccent(name)
         set({ accentName: name })
-      }
+      },
+      autoDimEnabled: true,
+      autoDimMinutes: 10,
+      burnInProtection: true,
+      setAutoDimEnabled: (enabled) => set({ autoDimEnabled: enabled }),
+      setAutoDimMinutes: (minutes) =>
+        set({ autoDimMinutes: Math.min(60, Math.max(1, Math.round(minutes))) }),
+      setBurnInProtection: (enabled) => {
+        applyBurnInProtection(enabled)
+        set({ burnInProtection: enabled })
+      },
+      photoFrameEnabled: false,
+      photoFrameFolder: null,
+      photoFrameIntervalSec: 30,
+      setPhotoFrameEnabled: (enabled) => set({ photoFrameEnabled: enabled }),
+      setPhotoFrameFolder: (folder) => set({ photoFrameFolder: folder }),
+      setPhotoFrameIntervalSec: (seconds) =>
+        set({ photoFrameIntervalSec: Math.min(600, Math.max(5, Math.round(seconds))) })
     }),
     {
       name: 'app-settings',
       storage: createJSONStorage(() => electronStorage),
       onRehydrateStorage: () => (state) => {
-        if (state) applyAccent(state.accentName)
+        if (state) {
+          applyAccent(state.accentName)
+          applyBurnInProtection(state.burnInProtection ?? true)
+        }
       }
     }
   )

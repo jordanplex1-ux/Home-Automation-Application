@@ -13,5 +13,6 @@ registerWidget({
   defaultConfig: { uprn: '', postcode: '' },
   defaultLayout: { w: 4, h: 3, minW: 3, minH: 2 },
   refreshInterval: 6 * 60 * 60 * 1000,
+  queryKeyPrefixes: ['bins-barnsley'],
   category: 'info'
 })

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { CloudOff } from 'lucide-react'
 import { fetchWeather } from '../../services/weather.service'
+import { fetchAirQuality } from '../../services/air-quality.service'
 import { CurrentWeatherView } from './components/CurrentWeatherView'
 import { HourlyForecastView } from './components/HourlyForecastView'
 import { Spinner } from '../../components/ui/Spinner'
@@ -10,12 +11,22 @@ const WEATHER_API_KEY = '8351aa5a69330eeb51ee1e4a5de26f80'
 const WEATHER_LAT = 53.568233
 const WEATHER_LON = -1.454471
 
-export function WeatherWidget({ instanceId: _instanceId, config: _config }: WidgetProps) {
+export function WeatherWidget({ instanceId: _instanceId, config }: WidgetProps) {
+  const showAirQuality = (config.showAirQuality as boolean) ?? true
+
   const weatherQuery = useQuery({
     queryKey: ['weather', WEATHER_LAT, WEATHER_LON],
     queryFn: () => fetchWeather(WEATHER_LAT, WEATHER_LON, WEATHER_API_KEY),
     refetchInterval: 60 * 60 * 1000,
     staleTime: 55 * 60 * 1000
+  })
+
+  const airQuery = useQuery({
+    queryKey: ['air-quality', WEATHER_LAT, WEATHER_LON],
+    queryFn: () => fetchAirQuality(WEATHER_LAT, WEATHER_LON),
+    refetchInterval: 60 * 60 * 1000,
+    staleTime: 55 * 60 * 1000,
+    enabled: showAirQuality
   })
 
   if (weatherQuery.isLoading) {
@@ -42,17 +53,23 @@ export function WeatherWidget({ instanceId: _instanceId, config: _config }: Widg
   }
 
   const data = weatherQuery.data
+  const airData = airQuery.data
 
   return (
     <div className="h-full flex flex-col gap-3 overflow-hidden">
       {/* Location */}
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-text-secondary">{data?.current.location}</p>
-        {weatherQuery.isRefetching && <Spinner size="sm" />}
+        {(weatherQuery.isRefetching || airQuery.isRefetching) && <Spinner size="sm" />}
       </div>
 
-      {/* Current conditions */}
-      {data && <CurrentWeatherView data={data.current} />}
+      {/* Current conditions (with air quality + pollen inline when enabled) */}
+      {data && (
+        <CurrentWeatherView
+          data={data.current}
+          air={showAirQuality ? airData : null}
+        />
+      )}
 
       {/* Hourly forecast */}
       {data && data.hourly.length > 0 && (

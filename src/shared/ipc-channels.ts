@@ -13,5 +13,10 @@ export const IPC = {
   BACKUP_PICK_FOLDER: 'backup:pick-folder',
   UPDATER_CHECK: 'updater:check',
   UPDATER_INSTALL_NOW: 'updater:install-now',
-  UPDATER_STATUS: 'updater:status'
+  UPDATER_STATUS: 'updater:status',
+  PHOTOS_PICK_FOLDER: 'photos:pick-folder',
+  PHOTOS_LIST: 'photos:list',
+  PHOTOS_READ: 'photos:read',
+  NEWS_FETCH: 'news:fetch',
+  NEWS_SOURCES: 'news:sources'
 } as const

@@ -33,5 +33,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on(IPC.UPDATER_STATUS, handler)
       return () => ipcRenderer.removeListener(IPC.UPDATER_STATUS, handler)
     }
+  },
+  photos: {
+    pickFolder: () => ipcRenderer.invoke(IPC.PHOTOS_PICK_FOLDER),
+    list: (folder: string) => ipcRenderer.invoke(IPC.PHOTOS_LIST, folder),
+    read: (path: string) => ipcRenderer.invoke(IPC.PHOTOS_READ, path)
+  },
+  news: {
+    fetch: (sourceIds: string[]) => ipcRenderer.invoke(IPC.NEWS_FETCH, sourceIds),
+    sources: () => ipcRenderer.invoke(IPC.NEWS_SOURCES)
   }
 })

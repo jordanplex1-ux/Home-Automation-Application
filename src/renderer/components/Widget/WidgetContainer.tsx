@@ -1,9 +1,11 @@
 import { Component as ReactComponent, useState, type ErrorInfo, type ReactNode } from 'react'
 import { GripHorizontal, Settings, Trash2, AlertTriangle, RefreshCw } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { getWidget } from '../../widgets/registry'
 import { useWidgetStore } from '../../stores/useWidgetStore'
 import { IconButton } from '../ui/IconButton'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
+import { toast } from '../../stores/useToastStore'
 import type { WidgetInstance } from '../../widgets/types'
 
 interface ErrorBoundaryProps {
@@ -59,11 +61,21 @@ export function WidgetContainer({ instance }: WidgetContainerProps) {
   const removeWidget = useWidgetStore((s) => s.removeWidget)
   const openSettings = useWidgetStore((s) => s.openSettings)
   const def = getWidget(instance.widgetId)
+  const queryClient = useQueryClient()
   const [confirmRemove, setConfirmRemove] = useState(false)
 
   if (!def) return null
 
   const Component = def.component
+  const canRefresh = !!def.queryKeyPrefixes?.length
+
+  const handleRefresh = () => {
+    if (!def.queryKeyPrefixes) return
+    for (const prefix of def.queryKeyPrefixes) {
+      queryClient.invalidateQueries({ queryKey: [prefix] })
+    }
+    toast.success(`Refreshing ${def.name}`)
+  }
 
   return (
     <div className="h-full flex flex-col bg-bg-secondary/80 backdrop-blur-md border border-border-subtle rounded-2xl overflow-hidden">
@@ -82,6 +94,11 @@ export function WidgetContainer({ instance }: WidgetContainerProps) {
         </div>
         {isEditing && (
           <div className="flex items-center gap-0.5">
+            {canRefresh && (
+              <IconButton label="Refresh" onClick={handleRefresh}>
+                <RefreshCw size={16} />
+              </IconButton>
+            )}
             {def.settingsComponent && (
               <IconButton label="Settings" onClick={() => openSettings(instance.instanceId)}>
                 <Settings size={16} />
