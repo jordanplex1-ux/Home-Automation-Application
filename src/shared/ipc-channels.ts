@@ -18,5 +18,11 @@ export const IPC = {
   PHOTOS_LIST: 'photos:list',
   PHOTOS_READ: 'photos:read',
   NEWS_FETCH: 'news:fetch',
-  NEWS_SOURCES: 'news:sources'
+  NEWS_SOURCES: 'news:sources',
+  GOOGLE_AUTH_IS_CONFIGURED: 'google:auth-is-configured',
+  GOOGLE_AUTH_BEGIN: 'google:auth-begin',
+  GOOGLE_AUTH_LIST_ACCOUNTS: 'google:auth-list-accounts',
+  GOOGLE_AUTH_DISCONNECT: 'google:auth-disconnect',
+  GOOGLE_CALENDAR_LIST: 'google:calendar-list',
+  GOOGLE_EVENTS_FETCH: 'google:events-fetch'
 } as const

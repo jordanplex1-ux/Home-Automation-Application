@@ -44,6 +44,47 @@ interface ElectronAPI {
     fetch: (sourceIds: string[]) => Promise<NewsHeadline[]>
     sources: () => Promise<NewsSource[]>
   }
+  google: {
+    isConfigured: () => Promise<boolean>
+    listAccounts: () => Promise<GoogleAccount[]>
+    beginAuth: () => Promise<{ ok: true; account: GoogleAccount } | { ok: false; message: string }>
+    disconnect: (email: string) => Promise<{ ok: true }>
+    listCalendars: (
+      email: string
+    ) => Promise<{ ok: true; calendars: GoogleCalendarSummary[] } | { ok: false; message: string }>
+    fetchEvents: (
+      requests: { email: string; calendarId: string }[],
+      timeMinISO: string,
+      timeMaxISO: string
+    ) => Promise<GoogleCalendarEvent[]>
+  }
+}
+
+interface GoogleAccount {
+  email: string
+  name: string
+  addedAt: string
+}
+interface GoogleCalendarSummary {
+  id: string
+  summary: string
+  primary?: boolean
+  backgroundColor?: string
+  foregroundColor?: string
+}
+interface GoogleCalendarEvent {
+  id: string
+  calendarId: string
+  accountEmail: string
+  title: string
+  date: string
+  endDate?: string
+  startTime: string
+  endTime: string
+  allDay: boolean
+  location?: string
+  notes?: string
+  color?: string
 }
 
 interface NewsHeadline {

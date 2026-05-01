@@ -37,7 +37,11 @@
       "Bash(powershell -Command \"Rename-Item .\\\\release .\\\\release_old_$\\(Get-Random\\)\")",
       "Bash(powershell -Command \"Rename-Item '.\\\\release' 'release_locked'\")",
       "Bash(powershell -Command 'Get-Process | Where-Object { $_.Modules | Where-Object { $_.FileName -like '\\\\''*app.asar*'\\\\'' } } | Select-Object ProcessName,Id,Path')",
-      "Bash(npx electron-builder *)"
+      "Bash(npx electron-builder *)",
+      "Bash(node -e \"console.log\\(typeof require\\('electron-vite'\\).loadEnv\\)\")",
+      "Bash(git check-ignore *)",
+      "Bash(rm -f \"release/Home Planner-0.1.4-x64.exe\" \"release/Home Planner-0.1.4-portable.exe\" \"release/Home Planner-0.1.4-x64.exe.blockmap\" \"release/home-planner-0.1.4-x64.nsis.7z\" \"release/__uninstaller-nsis-home-planner.exe\" \"release/builder-debug.yml\" \"release/builder-effective-config.yaml\")",
+      "Bash(rm -rf \"release/win-unpacked\")"
     ]
   }
 }

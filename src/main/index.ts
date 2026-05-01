@@ -8,6 +8,7 @@ import { setupBackupIPC } from './backup'
 import { setupUpdater } from './updater'
 import { setupPhotosIPC } from './photos'
 import { setupNewsIPC } from './news'
+import { setupGoogleCalendarIPC } from './google-calendar'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -56,6 +57,7 @@ app.whenReady().then(() => {
   setupUpdater()
   setupPhotosIPC()
   setupNewsIPC()
+  setupGoogleCalendarIPC()
   createWindow()
 })
 

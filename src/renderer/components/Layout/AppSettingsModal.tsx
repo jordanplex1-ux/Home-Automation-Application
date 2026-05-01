@@ -6,6 +6,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { useAppSettingsStore, ACCENT_PRESETS } from '../../stores/useAppSettingsStore'
 import { useWidgetStore } from '../../stores/useWidgetStore'
 import { toast } from '../../stores/useToastStore'
+import { GoogleCalendarSettings } from './GoogleCalendarSettings'
 
 interface AppSettingsModalProps {
   open: boolean
@@ -359,6 +360,14 @@ export function AppSettingsModal({ open, onClose }: AppSettingsModalProps) {
                 />
               </div>
             )}
+
+            {/* Google Calendar */}
+            <div>
+              <label className="text-xs text-text-secondary mb-2 block uppercase tracking-wider">
+                Google Calendar
+              </label>
+              <GoogleCalendarSettings />
+            </div>
 
             {/* Backup */}
             <div>

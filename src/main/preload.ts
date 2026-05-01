@@ -42,5 +42,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   news: {
     fetch: (sourceIds: string[]) => ipcRenderer.invoke(IPC.NEWS_FETCH, sourceIds),
     sources: () => ipcRenderer.invoke(IPC.NEWS_SOURCES)
+  },
+  google: {
+    isConfigured: () => ipcRenderer.invoke(IPC.GOOGLE_AUTH_IS_CONFIGURED),
+    listAccounts: () => ipcRenderer.invoke(IPC.GOOGLE_AUTH_LIST_ACCOUNTS),
+    beginAuth: () => ipcRenderer.invoke(IPC.GOOGLE_AUTH_BEGIN),
+    disconnect: (email: string) => ipcRenderer.invoke(IPC.GOOGLE_AUTH_DISCONNECT, email),
+    listCalendars: (email: string) => ipcRenderer.invoke(IPC.GOOGLE_CALENDAR_LIST, email),
+    fetchEvents: (
+      requests: { email: string; calendarId: string }[],
+      timeMinISO: string,
+      timeMaxISO: string
+    ) => ipcRenderer.invoke(IPC.GOOGLE_EVENTS_FETCH, requests, timeMinISO, timeMaxISO)
   }
 })

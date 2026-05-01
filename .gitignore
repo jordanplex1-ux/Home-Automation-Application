@@ -2,6 +2,15 @@ node_modules/
 out/
 dist/
 dist-electron/
+release/
+
+# Local secrets — keep .env.example committed so contributors know the schema,
+# but every other .env variant stays local.
 .env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
 *.log
 .exe

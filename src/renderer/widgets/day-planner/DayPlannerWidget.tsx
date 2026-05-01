@@ -5,6 +5,8 @@ import {
 } from 'date-fns'
 import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
 import { useCalendarStore } from '../../stores/useCalendarStore'
+import { useGoogleEvents } from '../../hooks/useGoogleEvents'
+import type { CalendarEvent } from '../../stores/useCalendarStore'
 import { TimelineView } from './components/TimelineView'
 import { MonthView } from './components/MonthView'
 import { MiniCalendar } from './components/MiniCalendar'
@@ -39,9 +41,36 @@ export function DayPlannerWidget({ config }: WidgetProps) {
   const removeEvent = useCalendarStore((s) => s.removeEvent)
   const getEventsForDate = useCalendarStore((s) => s.getEventsForDate)
 
+  // Google events for the current scope. Returned in CalendarEvent shape so we
+  // can merge them with local events without view changes.
+  const { events: googleEvents } = useGoogleEvents({
+    date: selectedDate,
+    scope: viewMode
+  })
+
+  // Multi-day Google events need to be expanded so they show on every day in
+  // their span (matching how local multi-day events are handled in
+  // useCalendarStore.getEventsForDate).
+  const expandGoogleForDate = useCallback(
+    (dateStr: string): CalendarEvent[] => {
+      const out: CalendarEvent[] = []
+      for (const g of googleEvents) {
+        if (g.endDate && g.endDate >= g.date) {
+          if (dateStr >= g.date && dateStr <= g.endDate) {
+            out.push({ ...g, id: `${g.id}_${dateStr}`, date: dateStr })
+          }
+        } else if (g.date === dateStr) {
+          out.push(g)
+        }
+      }
+      return out
+    },
+    [googleEvents]
+  )
+
   const dayEvents = useMemo(
-    () => getEventsForDate(dateStr),
-    [allEvents, recurringEvents, dateStr, getEventsForDate]
+    () => [...getEventsForDate(dateStr), ...expandGoogleForDate(dateStr)],
+    [allEvents, recurringEvents, dateStr, getEventsForDate, expandGoogleForDate]
   )
 
   // For month view we need events across all days in the month (including holidays + recurring)
@@ -49,15 +78,15 @@ export function DayPlannerWidget({ config }: WidgetProps) {
     if (viewMode === 'day') return dayEvents
     const ms = startOfMonth(selectedDate)
     const me = endOfMonth(selectedDate)
-    const results: import('../../stores/useCalendarStore').CalendarEvent[] = []
+    const results: CalendarEvent[] = []
     const current = new Date(ms)
     while (current <= me) {
       const ds = format(current, 'yyyy-MM-dd')
-      results.push(...getEventsForDate(ds))
+      results.push(...getEventsForDate(ds), ...expandGoogleForDate(ds))
       current.setDate(current.getDate() + 1)
     }
     return results
-  }, [allEvents, recurringEvents, selectedDate, viewMode, dayEvents, getEventsForDate])
+  }, [allEvents, recurringEvents, selectedDate, viewMode, dayEvents, getEventsForDate, expandGoogleForDate])
 
   const goToPrev = useCallback(() => {
     setSelectedDate((d) => {
