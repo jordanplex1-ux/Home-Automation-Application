@@ -1,8 +1,8 @@
-version: 0.1.5
+version: 0.1.6
 files:
-  - url: Home-Planner-0.1.5-x64.exe
-    sha512: JHsU3lBvbvtGEOEIKiO3cX7SGtCAKjdx3oTyeYLjIahKaTLaTUmHZxoyXm25VY+kml66oMmfyU+DYunnHGlQIg==
-    size: 87972983
-path: Home-Planner-0.1.5-x64.exe
-sha512: JHsU3lBvbvtGEOEIKiO3cX7SGtCAKjdx3oTyeYLjIahKaTLaTUmHZxoyXm25VY+kml66oMmfyU+DYunnHGlQIg==
-releaseDate: '2026-05-01T18:55:58.102Z'
+  - url: Home-Planner-0.1.6-x64.exe
+    sha512: SbGVDrfBB9kYb3JIabfSn9uawuF6cmNfuILmeNaOKaxeyK90588mqNWxhObmq9pdicvlsdqwAQgNrC2klnl6ag==
+    size: 87986234
+path: Home-Planner-0.1.6-x64.exe
+sha512: SbGVDrfBB9kYb3JIabfSn9uawuF6cmNfuILmeNaOKaxeyK90588mqNWxhObmq9pdicvlsdqwAQgNrC2klnl6ag==
+releaseDate: '2026-05-13T18:07:47.967Z'

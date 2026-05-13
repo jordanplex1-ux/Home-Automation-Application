@@ -11,6 +11,7 @@ interface WidgetState {
   settingsInstanceId: string | null
   addWidget: (widgetId: string) => void
   removeWidget: (instanceId: string) => void
+  duplicateWidget: (instanceId: string) => void
   updateConfig: (instanceId: string, patch: Record<string, unknown>) => void
   updateLayouts: (layouts: Layout[]) => void
   setEditing: (editing: boolean) => void
@@ -55,6 +56,24 @@ export const useWidgetStore = create<WidgetState>()(
         set((state) => ({
           instances: state.instances.filter((i) => i.instanceId !== instanceId)
         }))
+      },
+
+      duplicateWidget: (instanceId: string) => {
+        set((state) => {
+          const src = state.instances.find((i) => i.instanceId === instanceId)
+          if (!src) return state
+          const clone: WidgetInstance = {
+            instanceId: generateId(),
+            widgetId: src.widgetId,
+            // Shallow-clone the config — settings are mostly primitives so
+            // mutations don't bleed. Caller can edit independently.
+            config: { ...src.config },
+            // Drop the clone in at y=Infinity so react-grid-layout slots it
+            // at the bottom rather than overlapping the original.
+            layout: { x: src.layout.x, y: Infinity, w: src.layout.w, h: src.layout.h }
+          }
+          return { instances: [...state.instances, clone] }
+        })
       },
 
       updateConfig: (instanceId: string, patch: Record<string, unknown>) => {

@@ -60,6 +60,8 @@ export const ACCENT_PRESETS: AccentPreset[] = [
   }
 ]
 
+export type ActiveScreen = 'family' | 'whiteboard' | 'home-automation'
+
 interface AppSettingsState {
   accentName: string
   setAccent: (name: string) => void
@@ -76,6 +78,15 @@ interface AppSettingsState {
   setPhotoFrameEnabled: (enabled: boolean) => void
   setPhotoFrameFolder: (folder: string | null) => void
   setPhotoFrameIntervalSec: (seconds: number) => void
+  // Top-level screen — persisted so the wall returns to the same view after
+  // a reboot or update.
+  activeScreen: ActiveScreen
+  setActiveScreen: (screen: ActiveScreen) => void
+  // Edit lock — when enabled, entering edit mode prompts for a PIN. Useful for
+  // stopping kids rearranging the wall display.
+  editLockEnabled: boolean
+  editLockPinHash: string | null
+  setEditLock: (enabled: boolean, pinHash: string | null) => void
 }
 
 function applyAccent(name: string) {
@@ -119,7 +130,13 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       setPhotoFrameEnabled: (enabled) => set({ photoFrameEnabled: enabled }),
       setPhotoFrameFolder: (folder) => set({ photoFrameFolder: folder }),
       setPhotoFrameIntervalSec: (seconds) =>
-        set({ photoFrameIntervalSec: Math.min(600, Math.max(5, Math.round(seconds))) })
+        set({ photoFrameIntervalSec: Math.min(600, Math.max(5, Math.round(seconds))) }),
+      activeScreen: 'family',
+      setActiveScreen: (screen) => set({ activeScreen: screen }),
+      editLockEnabled: false,
+      editLockPinHash: null,
+      setEditLock: (enabled, pinHash) =>
+        set({ editLockEnabled: enabled, editLockPinHash: pinHash })
     }),
     {
       name: 'app-settings',

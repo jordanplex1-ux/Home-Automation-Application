@@ -214,7 +214,17 @@ async function exchangeCodeForTokens(
     const text = await res.text()
     throw new Error(`Token exchange failed: ${res.status} ${text}`)
   }
-  return res.json() as Promise<{ access_token: string; refresh_token: string; expires_in: number }>
+  const tokens = (await res.json()) as {
+    access_token: string
+    refresh_token: string
+    expires_in: number
+    scope?: string
+  }
+  // Diagnostic: confirm which scopes Google actually granted. If
+  // calendar.readonly is missing here, the OAuth consent screen on
+  // Google Cloud probably hasn't had that scope added.
+  console.log('[google-auth] granted scopes:', tokens.scope ?? '(none in response)')
+  return tokens
 }
 
 async function refreshAccessToken(refreshToken: string): Promise<{ access_token: string; expires_in: number }> {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Palette, Monitor, Cog, Info } from 'lucide-react'
+import { Palette, Monitor, Cog, Info, Activity } from 'lucide-react'
 import { Modal } from '../ui/Modal'
 import { Button } from '../ui/Button'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
@@ -7,19 +7,24 @@ import { useAppSettingsStore, ACCENT_PRESETS } from '../../stores/useAppSettings
 import { useWidgetStore } from '../../stores/useWidgetStore'
 import { toast } from '../../stores/useToastStore'
 import { GoogleCalendarSettings } from './GoogleCalendarSettings'
+import { DevPanel } from './DevPanel'
+import { EditLockSettings } from './EditLockSettings'
+import { LayoutPresetManager } from './LayoutPresetManager'
+import { RELEASE_NOTES } from '../../data/releaseNotes'
 
 interface AppSettingsModalProps {
   open: boolean
   onClose: () => void
 }
 
-type TabId = 'general' | 'display' | 'system' | 'about'
+type TabId = 'general' | 'display' | 'system' | 'dev' | 'about'
 
 const TABS: { id: TabId; label: string; icon: typeof Palette }[] = [
   { id: 'general', label: 'General', icon: Palette },
   { id: 'display', label: 'Display', icon: Monitor },
   { id: 'system', label: 'System', icon: Cog },
-  { id: 'about', label: 'About', icon: Info }
+  { id: 'dev',     label: 'Dev',     icon: Activity },
+  { id: 'about',   label: 'About',   icon: Info }
 ]
 
 export function AppSettingsModal({ open, onClose }: AppSettingsModalProps) {
@@ -361,6 +366,14 @@ export function AppSettingsModal({ open, onClose }: AppSettingsModalProps) {
               </div>
             )}
 
+            {/* Edit lock */}
+            <div>
+              <label className="text-xs text-text-secondary mb-2 block uppercase tracking-wider">
+                Edit Lock
+              </label>
+              <EditLockSettings />
+            </div>
+
             {/* Google Calendar */}
             <div>
               <label className="text-xs text-text-secondary mb-2 block uppercase tracking-wider">
@@ -450,6 +463,14 @@ export function AppSettingsModal({ open, onClose }: AppSettingsModalProps) {
               </div>
             )}
 
+            {/* Layout presets */}
+            <div>
+              <label className="text-xs text-text-secondary mb-2 block uppercase tracking-wider">
+                Layout Presets
+              </label>
+              <LayoutPresetManager />
+            </div>
+
             {/* Layout */}
             <div>
               <label className="text-xs text-text-secondary mb-2 block uppercase tracking-wider">
@@ -467,13 +488,80 @@ export function AppSettingsModal({ open, onClose }: AppSettingsModalProps) {
           </div>
         )}
 
+        {tab === 'dev' && <DevPanel />}
+
         {tab === 'about' && (
-          <div className="flex flex-col gap-3 text-xs text-text-disabled">
-            <p className="text-sm text-text-primary font-medium">Home Planner v{__APP_VERSION__}</p>
-            <p>Built for wall-mounted touchscreens.</p>
-            <p>
-              Press <kbd className="px-1.5 py-0.5 rounded bg-bg-tertiary text-text-secondary">?</kbd> to see keyboard shortcuts.
-            </p>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5 text-xs text-text-disabled">
+              <p className="text-sm text-text-primary font-medium">
+                Home Planner v{__APP_VERSION__}
+              </p>
+              <p>Built for wall-mounted touchscreens.</p>
+              <p>
+                Press{' '}
+                <kbd className="px-1.5 py-0.5 rounded bg-bg-tertiary text-text-secondary">
+                  Shift
+                </kbd>{' '}
+                +{' '}
+                <kbd className="px-1.5 py-0.5 rounded bg-bg-tertiary text-text-secondary">
+                  ?
+                </kbd>{' '}
+                to see keyboard shortcuts.
+              </p>
+            </div>
+
+            <div>
+              <label className="text-xs text-text-secondary mb-2 block uppercase tracking-wider">
+                Release Notes
+              </label>
+              {/* Capped height so the release-notes list scrolls inside the
+                  About tab rather than ballooning the whole modal. */}
+              <div className="max-h-[40vh] overflow-y-auto rounded-xl bg-bg-tertiary border border-border-subtle p-3 flex flex-col gap-4">
+                {RELEASE_NOTES.map((release, idx) => (
+                  <div key={release.version}>
+                    <div className="flex items-baseline gap-2 mb-2">
+                      <span
+                        className={`text-sm font-medium ${
+                          idx === 0 ? 'text-accent-primary' : 'text-text-primary'
+                        }`}
+                      >
+                        v{release.version}
+                      </span>
+                      <span className="text-[10px] text-text-disabled tabular-nums">
+                        {release.date}
+                      </span>
+                      {idx === 0 && (
+                        <span className="ml-auto text-[9px] uppercase tracking-wider text-accent-primary/80">
+                          Current
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-2.5">
+                      {release.sections.map((section) => (
+                        <div key={section.title}>
+                          <p className="text-[10px] uppercase tracking-wider text-text-disabled mb-1">
+                            {section.title}
+                          </p>
+                          <ul className="flex flex-col gap-1">
+                            {section.items.map((item, i) => (
+                              <li
+                                key={i}
+                                className="text-xs text-text-secondary leading-relaxed pl-3 relative before:content-['•'] before:absolute before:left-0 before:text-text-disabled"
+                              >
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                    {idx < RELEASE_NOTES.length - 1 && (
+                      <div className="mt-4 border-t border-border-subtle/60" />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </Modal>

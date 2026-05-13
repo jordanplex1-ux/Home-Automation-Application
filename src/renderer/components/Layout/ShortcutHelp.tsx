@@ -6,7 +6,7 @@ interface ShortcutHelpProps {
 }
 
 const SHORTCUTS: { keys: string[]; description: string }[] = [
-  { keys: ['?'], description: 'Show this help' },
+  { keys: ['Shift', '?'], description: 'Show this help' },
   { keys: ['E'], description: 'Toggle edit mode' },
   { keys: ['R'], description: 'Refresh all widgets' },
   { keys: ['D'], description: 'Dim screen' },

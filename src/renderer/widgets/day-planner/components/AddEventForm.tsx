@@ -12,7 +12,18 @@ export interface AddEventSubmitPayload {
   allDay?: boolean
   endDate?: string
   recurringType?: RecurringType
+  reminderMinutes?: number | null
 }
+
+const REMINDER_OPTIONS: { value: number | null; label: string }[] = [
+  { value: null, label: 'None' },
+  { value: 0,    label: 'At start' },
+  { value: 5,    label: '5 min' },
+  { value: 15,   label: '15 min' },
+  { value: 30,   label: '30 min' },
+  { value: 60,   label: '1 hour' },
+  { value: 1440, label: '1 day' }
+]
 
 interface AddEventFormProps {
   date: string             // display label, e.g. "Monday, 5 May 2026"
@@ -43,6 +54,7 @@ export function AddEventForm({ date, defaultDateISO, defaultStartTime, onSubmit,
   const [endDate, setEndDate] = useState(defaultDateISO)
   const [color, setColor] = useState(EVENT_COLORS[0])
   const [recurring, setRecurring] = useState<RecurringType | 'none'>('none')
+  const [reminder, setReminder] = useState<number | null>(null)
 
   const handleSubmit = () => {
     if (!title.trim()) return
@@ -53,7 +65,8 @@ export function AddEventForm({ date, defaultDateISO, defaultStartTime, onSubmit,
       color,
       allDay: allDay || undefined,
       endDate: multiDay && endDate > defaultDateISO ? endDate : undefined,
-      recurringType: recurring === 'none' ? undefined : recurring
+      recurringType: recurring === 'none' ? undefined : recurring,
+      reminderMinutes: reminder
     }
     onSubmit(payload)
   }
@@ -156,6 +169,29 @@ export function AddEventForm({ date, defaultDateISO, defaultStartTime, onSubmit,
               {opt.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Reminder */}
+      <div>
+        <label className="text-xs text-text-secondary mb-1.5 block">Reminder</label>
+        <div className="flex gap-1.5 flex-wrap">
+          {REMINDER_OPTIONS.map((opt) => {
+            const active = reminder === opt.value
+            return (
+              <button
+                key={opt.label}
+                onClick={() => setReminder(opt.value)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all touch-manipulation ${
+                  active
+                    ? 'bg-accent-primary/20 text-accent-primary border border-accent-primary/30'
+                    : 'bg-bg-tertiary text-text-secondary border border-border-subtle hover:bg-bg-hover'
+                }`}
+              >
+                {opt.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 

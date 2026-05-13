@@ -65,17 +65,26 @@ async function gFetch<T>(token: string, url: string): Promise<T> {
 
 async function listCalendarsForAccount(email: string): Promise<GoogleCalendarSummary[]> {
   const token = await getAccessToken(email)
+  // No minAccessRole filter — return every calendar visible to the account.
+  // The renderer-side selection UI lets the user pick which ones to actually
+  // sync, so we don't need server-side filtering here.
   const data = await gFetch<RawListResponse<RawCalendarItem>>(
     token,
-    'https://www.googleapis.com/calendar/v3/users/me/calendarList?minAccessRole=reader'
+    'https://www.googleapis.com/calendar/v3/users/me/calendarList'
   )
-  return (data.items ?? []).map((c) => ({
+  const calendars = (data.items ?? []).map((c) => ({
     id: c.id,
     summary: c.summary,
     primary: c.primary,
     backgroundColor: c.backgroundColor,
     foregroundColor: c.foregroundColor
   }))
+  console.log(`[google-calendar] ${email}: ${calendars.length} calendars returned`)
+  if (calendars.length === 0) {
+    // Log the raw response so we can see if Google sent something unexpected
+    console.log('[google-calendar] raw response:', JSON.stringify(data).slice(0, 500))
+  }
+  return calendars
 }
 
 /**

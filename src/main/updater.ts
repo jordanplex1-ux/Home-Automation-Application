@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import pkg from 'electron-updater'
 import { IPC } from '../shared/ipc-channels'
+import { writeBackupToFolder, getPreferredBackupFolder } from './backup'
 
 const { autoUpdater } = pkg
 
@@ -38,7 +39,19 @@ export function setupUpdater(): void {
   autoUpdater.on('update-available', (info) => broadcast({ kind: 'available', version: info.version }))
   autoUpdater.on('update-not-available', () => broadcast({ kind: 'not-available' }))
   autoUpdater.on('download-progress', (p) => broadcast({ kind: 'downloading', percent: p.percent }))
-  autoUpdater.on('update-downloaded', (info) => broadcast({ kind: 'downloaded', version: info.version }))
+  autoUpdater.on('update-downloaded', async (info) => {
+    // Before announcing the update is ready, snapshot the current data to
+    // the configured backup folder. If the new version mangles anything we
+    // can roll back via the App Settings → Restore flow.
+    try {
+      const folder = getPreferredBackupFolder()
+      const path = await writeBackupToFolder(folder)
+      console.log(`[updater] Pre-update backup written to ${path}`)
+    } catch (err) {
+      console.warn('[updater] Pre-update backup failed:', (err as Error).message)
+    }
+    broadcast({ kind: 'downloaded', version: info.version })
+  })
   autoUpdater.on('error', (err) => broadcast({ kind: 'error', message: err?.message || String(err) }))
 
   ipcMain.handle(IPC.UPDATER_CHECK, async () => {

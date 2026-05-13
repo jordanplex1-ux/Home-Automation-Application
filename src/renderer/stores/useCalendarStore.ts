@@ -15,6 +15,12 @@ export interface CalendarEvent {
   isHoliday?: boolean
   allDay?: boolean
   recurring?: RecurringRule
+  /**
+   * Minutes before the event's start time to fire a reminder. Omit/null = no
+   * reminder. 0 = fires at the exact start time. Reminders are best-effort —
+   * they only fire while the app is running.
+   */
+  reminderMinutes?: number | null
 }
 
 export interface RecurringRule {

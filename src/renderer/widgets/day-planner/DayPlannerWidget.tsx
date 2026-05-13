@@ -117,6 +117,7 @@ export function DayPlannerWidget({ config }: WidgetProps) {
       allDay?: boolean
       endDate?: string
       recurringType?: 'yearly' | 'monthly' | 'weekly'
+      reminderMinutes?: number | null
     }) => {
       if (event.recurringType) {
         addRecurringEvent({
@@ -126,7 +127,8 @@ export function DayPlannerWidget({ config }: WidgetProps) {
           color: event.color,
           allDay: event.allDay,
           date: dateStr,
-          recurring: { type: event.recurringType, originalDate: dateStr }
+          recurring: { type: event.recurringType, originalDate: dateStr },
+          reminderMinutes: event.reminderMinutes
         })
       } else {
         addEvent({
@@ -136,7 +138,8 @@ export function DayPlannerWidget({ config }: WidgetProps) {
           color: event.color,
           allDay: event.allDay,
           endDate: event.endDate,
-          date: dateStr
+          date: dateStr,
+          reminderMinutes: event.reminderMinutes
         })
       }
       setAddingEvent(null)

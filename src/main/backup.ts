@@ -43,7 +43,7 @@ function buildBackup(): BackupPayload {
   }
 }
 
-async function writeBackupToFolder(folder: string): Promise<string> {
+export async function writeBackupToFolder(folder: string): Promise<string> {
   await fs.mkdir(folder, { recursive: true })
   const stamp = new Date().toISOString().replace(/[:.]/g, '-')
   const filePath = join(folder, `home-planner-backup-${stamp}.json`)
@@ -85,6 +85,16 @@ async function runScheduledCheck(): Promise<void> {
   } catch (err) {
     console.error('[backup] Scheduled backup failed:', err)
   }
+}
+
+/**
+ * Get the backup folder configured for scheduled backups, falling back to
+ * the app's userData directory if none is set. Used by the updater to write
+ * a snapshot before applying an update.
+ */
+export function getPreferredBackupFolder(): string {
+  const schedule = metaStore.get('schedule')
+  return schedule.folder ?? join(app.getPath('userData'), 'backups')
 }
 
 let scheduleTimer: NodeJS.Timeout | null = null
