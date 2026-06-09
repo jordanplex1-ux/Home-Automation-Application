@@ -131,19 +131,19 @@ export function AppShell() {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-bg-primary">
-      {/* Header — screen tabs on the left, clock centred. Tabs are absolutely
-          positioned so the clock stays geometrically centred regardless of
-          how wide the tab bar grows. */}
-      <header className="relative flex items-center justify-center py-6 shrink-0">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-3">
+      {/* Header — clock on top (centred, prominent), screen tabs on the row
+          below. Stacking keeps the clock dead-centre on the narrow portrait
+          wall panel without the tabs ever colliding with it. */}
+      <header className="flex flex-col items-center gap-2 py-3 px-2 shrink-0">
+        <Clock />
+        <div className="flex items-center gap-2">
           <ScreenTabs />
           {isFamily && <LayoutPresetMenu />}
         </div>
-        <Clock />
       </header>
 
       {/* Main content — routed by activeScreen */}
-      <main className="flex-1 px-4 pb-2 overflow-auto min-h-0">
+      <main className="flex-1 px-2 pb-2 overflow-auto min-h-0">
         {activeScreen === 'family' && <FamilyHub />}
         {activeScreen === 'whiteboard' && <Whiteboard />}
         {activeScreen === 'home-automation' && <HomeAutomation />}

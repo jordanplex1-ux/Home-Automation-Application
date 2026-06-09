@@ -104,38 +104,42 @@ function Ticker({ items, speed }: TickerProps) {
   const loopItems = [...items, ...items]
 
   return (
-    <div className="h-full flex items-center overflow-hidden relative">
-      {/* Edge fade masks so items don't pop in at the boundaries */}
-      <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-bg-secondary to-transparent" />
-      <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l from-bg-secondary to-transparent" />
+    <div className="h-full flex flex-col overflow-hidden">
+      {/* Scrolling headlines occupy the upper area */}
+      <div className="relative flex-1 flex items-center overflow-hidden">
+        {/* Edge fade masks so items don't pop in at the boundaries */}
+        <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-bg-secondary to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l from-bg-secondary to-transparent" />
 
-      <div
-        ref={stripRef}
-        className="flex gap-8 whitespace-nowrap anim-ticker will-change-transform"
-        style={{
-          width: 'max-content',
-          ['--ticker-duration' as string]: `${durationSec}s`
-        }}
-      >
-        {loopItems.map((item, idx) => (
-          <div key={`${item.link || item.title}-${idx}`} className="flex items-center gap-2">
-            <span className="text-[10px] font-semibold text-accent-primary uppercase tracking-wider">
-              {item.source}
-            </span>
-            <span className="text-text-disabled">·</span>
-            <span className="text-sm text-text-primary">{item.title}</span>
-          </div>
-        ))}
+        <div
+          ref={stripRef}
+          className="flex gap-8 whitespace-nowrap anim-ticker will-change-transform"
+          style={{
+            width: 'max-content',
+            ['--ticker-duration' as string]: `${durationSec}s`
+          }}
+        >
+          {loopItems.map((item, idx) => (
+            <div key={`${item.link || item.title}-${idx}`} className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold text-accent-primary uppercase tracking-wider">
+                {item.source}
+              </span>
+              <span className="text-text-disabled">·</span>
+              <span className="text-sm text-text-primary">{item.title}</span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* "LIVE" pill — centred along the bottom edge so it no longer crowds
-          the first headline. Semi-opaque backdrop keeps it readable as
-          headlines scroll behind it. */}
-      <div className="pointer-events-none absolute bottom-0.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-secondary/90 border border-accent-danger/30 backdrop-blur-sm">
-        <span className="w-1.5 h-1.5 rounded-full bg-accent-danger animate-pulse" />
-        <span className="text-[10px] font-semibold text-accent-danger uppercase tracking-wider">
-          Live
-        </span>
+      {/* "LIVE" badge in its own row below the headlines — centred, and out of
+          the scrolling text's path so it can never clip over a headline. */}
+      <div className="shrink-0 flex justify-center pb-0.5">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent-danger/15 border border-accent-danger/30">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-danger animate-pulse" />
+          <span className="text-[10px] font-semibold text-accent-danger uppercase tracking-wider">
+            Live
+          </span>
+        </div>
       </div>
     </div>
   )

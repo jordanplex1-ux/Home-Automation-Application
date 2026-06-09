@@ -9,7 +9,10 @@ const ResponsiveGrid = WidthProvider(Responsive)
 
 const COLS = { lg: 12, md: 8, sm: 4, xs: 2 }
 const ROW_HEIGHT = 80
-const MARGIN: [number, number] = [12, 12]
+// Gap between widgets, and (since containerPadding defaults to this) the gap
+// from the widgets to the screen edge. Halved from [12,12] to tighten the
+// generous blank space on the portrait wall panel.
+const MARGIN: [number, number] = [6, 6]
 
 export function WidgetGrid() {
   const instances = useWidgetStore((s) => s.instances)

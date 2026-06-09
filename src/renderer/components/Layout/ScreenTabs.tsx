@@ -32,7 +32,7 @@ export function ScreenTabs() {
             {i > 0 && <span className="w-px h-5 bg-border-subtle/80" aria-hidden />}
             <button
               onClick={() => setActive(t.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-medium transition-all touch-manipulation ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all touch-manipulation ${
                 isActive
                   ? 'bg-accent-primary/20 text-accent-primary shadow-glow-sm'
                   : 'text-text-secondary hover:bg-bg-hover hover:text-text-primary'

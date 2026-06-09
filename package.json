@@ -1,6 +1,6 @@
 {
   "name": "home-planner",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Touchscreen home planner dashboard for wall-mounted displays",
   "main": "./out/main/index.js",
   "scripts": {

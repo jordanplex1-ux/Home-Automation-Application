@@ -20,6 +20,26 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.1.8',
+    date: '2026-06-09',
+    sections: [
+      {
+        title: 'Improved',
+        items: [
+          'Header redesigned for the portrait wall display — the clock sits centred above the navigation tabs, so the tabs no longer overlap it',
+          'Tighter spacing — halved the gap between widgets and the screen edges, and between stacked widgets, reclaiming wasted space',
+          'Follow-up to the v0.1.7 padding fix: dialled the now-active padding back to sensible amounts across the header and layout'
+        ]
+      },
+      {
+        title: 'Fixed',
+        items: [
+          'News ticker “LIVE” badge no longer overlaps the scrolling headline — it now sits on its own line beneath the text'
+        ]
+      }
+    ]
+  },
+  {
     version: '0.1.7',
     date: '2026-06-09',
     sections: [
