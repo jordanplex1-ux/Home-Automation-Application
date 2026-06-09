@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import {
   addDays, subDays, addMonths, subMonths,
   format, startOfMonth, endOfMonth
@@ -34,6 +34,27 @@ export function DayPlannerWidget({ config }: WidgetProps) {
   const [viewDropdownOpen, setViewDropdownOpen] = useState(false)
 
   const dateStr = format(selectedDate, 'yyyy-MM-dd')
+
+  // Keep the view in sync with the real-world date. On an always-on wall
+  // display the widget can sit untouched across midnight; without this the
+  // "today" highlight (and the selected day) would stay stuck on yesterday.
+  // We only auto-advance when the user was actually viewing the old "today" —
+  // if they've navigated to some other date deliberately, we leave it alone.
+  const todayStrRef = useRef(format(new Date(), 'yyyy-MM-dd'))
+  useEffect(() => {
+    const checkRollover = () => {
+      const realToday = format(new Date(), 'yyyy-MM-dd')
+      if (realToday === todayStrRef.current) return
+      const wasViewingOldToday = format(selectedDate, 'yyyy-MM-dd') === todayStrRef.current
+      todayStrRef.current = realToday
+      if (wasViewingOldToday) setSelectedDate(new Date())
+    }
+    // Check once a minute — cheap, and fine-grained enough to roll over
+    // within a minute of midnight.
+    const id = window.setInterval(checkRollover, 60 * 1000)
+    return () => window.clearInterval(id)
+  }, [selectedDate])
+
   const allEvents = useCalendarStore((s) => s.events)
   const recurringEvents = useCalendarStore((s) => s.recurringEvents)
   const addEvent = useCalendarStore((s) => s.addEvent)

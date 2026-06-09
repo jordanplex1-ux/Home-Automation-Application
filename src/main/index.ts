@@ -9,6 +9,7 @@ import { setupUpdater } from './updater'
 import { setupPhotosIPC } from './photos'
 import { setupNewsIPC } from './news'
 import { setupGoogleCalendarIPC } from './google-calendar'
+import { setupRingIPC } from './ring'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -58,6 +59,7 @@ app.whenReady().then(() => {
   setupPhotosIPC()
   setupNewsIPC()
   setupGoogleCalendarIPC()
+  setupRingIPC()
   createWindow()
 })
 

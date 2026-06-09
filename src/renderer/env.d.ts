@@ -58,6 +58,46 @@ interface ElectronAPI {
       timeMaxISO: string
     ) => Promise<GoogleCalendarEvent[]>
   }
+  ring: {
+    status: () => Promise<RingStatus>
+    loginStart: (
+      email: string,
+      password: string
+    ) => Promise<
+      | { ok: true; needs2fa: false }
+      | { ok: true; needs2fa: true; prompt: string }
+      | { ok: false; message: string }
+    >
+    login2fa: (code: string) => Promise<{ ok: true } | { ok: false; message: string }>
+    logout: () => Promise<{ ok: true }>
+    listCameras: () => Promise<
+      { ok: true; cameras: RingCameraInfo[] } | { ok: false; message: string; cameras: [] }
+    >
+    snapshot: (
+      cameraId: number
+    ) => Promise<{ ok: true; dataUrl: string } | { ok: false; message: string }>
+    onEvent: (cb: (event: RingEvent) => void) => () => void
+    onStatus: (cb: (status: RingStatus) => void) => () => void
+  }
+}
+
+interface RingCameraInfo {
+  id: number
+  name: string
+}
+
+interface RingStatus {
+  configured: boolean
+  connected: boolean
+  error: string | null
+  cameras: RingCameraInfo[]
+}
+
+interface RingEvent {
+  kind: 'ding' | 'motion'
+  cameraId: number
+  cameraName: string
+  at: number
 }
 
 interface GoogleAccount {

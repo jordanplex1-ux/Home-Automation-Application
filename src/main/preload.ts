@@ -54,5 +54,24 @@ contextBridge.exposeInMainWorld('electronAPI', {
       timeMinISO: string,
       timeMaxISO: string
     ) => ipcRenderer.invoke(IPC.GOOGLE_EVENTS_FETCH, requests, timeMinISO, timeMaxISO)
+  },
+  ring: {
+    status: () => ipcRenderer.invoke(IPC.RING_STATUS),
+    loginStart: (email: string, password: string) =>
+      ipcRenderer.invoke(IPC.RING_LOGIN_START, email, password),
+    login2fa: (code: string) => ipcRenderer.invoke(IPC.RING_LOGIN_2FA, code),
+    logout: () => ipcRenderer.invoke(IPC.RING_LOGOUT),
+    listCameras: () => ipcRenderer.invoke(IPC.RING_LIST_CAMERAS),
+    snapshot: (cameraId: number) => ipcRenderer.invoke(IPC.RING_SNAPSHOT, cameraId),
+    onEvent: (cb: (event: unknown) => void) => {
+      const handler = (_e: unknown, event: unknown) => cb(event)
+      ipcRenderer.on(IPC.RING_EVENT, handler)
+      return () => ipcRenderer.removeListener(IPC.RING_EVENT, handler)
+    },
+    onStatus: (cb: (status: unknown) => void) => {
+      const handler = (_e: unknown, status: unknown) => cb(status)
+      ipcRenderer.on(IPC.RING_STATUS, handler)
+      return () => ipcRenderer.removeListener(IPC.RING_STATUS, handler)
+    }
   }
 })

@@ -87,6 +87,10 @@ interface AppSettingsState {
   editLockEnabled: boolean
   editLockPinHash: string | null
   setEditLock: (enabled: boolean, pinHash: string | null) => void
+  // Ring: doorbell presses always pop the live feed; motion is opt-in since it
+  // can be noisy.
+  ringMotionAlerts: boolean
+  setRingMotionAlerts: (enabled: boolean) => void
 }
 
 function applyAccent(name: string) {
@@ -136,7 +140,9 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       editLockEnabled: false,
       editLockPinHash: null,
       setEditLock: (enabled, pinHash) =>
-        set({ editLockEnabled: enabled, editLockPinHash: pinHash })
+        set({ editLockEnabled: enabled, editLockPinHash: pinHash }),
+      ringMotionAlerts: false,
+      setRingMotionAlerts: (enabled) => set({ ringMotionAlerts: enabled })
     }),
     {
       name: 'app-settings',

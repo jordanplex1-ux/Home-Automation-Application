@@ -26,8 +26,21 @@
 
 * {
   margin: 0;
-  padding: 0;
   box-sizing: border-box;
+}
+
+/* Padding reset lives in the `base` layer (not unlayered) so Tailwind's
+   padding utilities — which sit in the later `utilities` layer — override it
+   as intended. Previously this was an unlayered `* { padding: 0 }`, which beats
+   ALL layered utilities by cascade-layer precedence and silently nullified
+   every `p-*`/`px-*`/`py-*` class app-wide. That left text jammed against
+   rounded corners and panel edges (calendar, weather, bins, the footer
+   version label, etc.). Margin stays unlayered above — layouts here rely on
+   flex `gap`, not margin utilities, so we leave that behaviour untouched. */
+@layer base {
+  * {
+    padding: 0;
+  }
 }
 
 html, body, #root {

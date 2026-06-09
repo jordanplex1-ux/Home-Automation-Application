@@ -73,6 +73,7 @@ export function TodoWidget({ instanceId, config }: WidgetProps) {
             key={item.id}
             text={item.text}
             completed={false}
+            createdAt={item.createdAt}
             onToggle={() => toggleItem(instanceId, item.id)}
             onDelete={() => removeItem(instanceId, item.id)}
           />
@@ -87,6 +88,7 @@ export function TodoWidget({ instanceId, config }: WidgetProps) {
             key={item.id}
             text={item.text}
             completed
+            createdAt={item.createdAt}
             onToggle={() => toggleItem(instanceId, item.id)}
             onDelete={() => removeItem(instanceId, item.id)}
           />
@@ -98,14 +100,43 @@ export function TodoWidget({ instanceId, config }: WidgetProps) {
 
 const EMPTY: never[] = []
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+/**
+ * How long the task has been on the list, as a compact badge label.
+ * Uses calendar-day boundaries (not 24h windows) so a task added yesterday
+ * evening reads "1d" this morning, matching how people think about it.
+ */
+function ageLabel(createdAt: number): string {
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+  const startOfCreated = new Date(createdAt)
+  startOfCreated.setHours(0, 0, 0, 0)
+  const days = Math.round((startOfToday.getTime() - startOfCreated.getTime()) / MS_PER_DAY)
+  if (days <= 0) return 'Today'
+  if (days === 1) return '1 day'
+  return `${days} days`
+}
+
 interface TodoRowProps {
   text: string
   completed: boolean
+  createdAt: number
   onToggle: () => void
   onDelete: () => void
 }
 
-function TodoRow({ text, completed, onToggle, onDelete }: TodoRowProps) {
+function TodoRow({ text, completed, createdAt, onToggle, onDelete }: TodoRowProps) {
+  const age = ageLabel(createdAt)
+  // Tint older tasks amber once they've lingered past a week so stale items
+  // draw the eye. Completed items always read muted.
+  const days = Math.round((Date.now() - createdAt) / MS_PER_DAY)
+  const ageClass = completed
+    ? 'text-text-disabled/70'
+    : days >= 7
+    ? 'text-accent-warning'
+    : 'text-text-disabled'
+
   return (
     <div className="group flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-bg-hover/60 transition-colors">
       <button
@@ -125,6 +156,9 @@ function TodoRow({ text, completed, onToggle, onDelete }: TodoRowProps) {
         }`}
       >
         {text}
+      </span>
+      <span className={`shrink-0 text-[10px] tabular-nums whitespace-nowrap ${ageClass}`}>
+        {age}
       </span>
       <button
         onClick={onDelete}

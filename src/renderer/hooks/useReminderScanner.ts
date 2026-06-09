@@ -29,8 +29,8 @@ function dateLabel(date: Date): string {
 /**
  * Periodically scans local events and fires reminders that have entered
  * their "trigger window" (between reminderMinutes-before and event start).
- * Reminders are de-duplicated via the store's `fired` set so the same event
- * won't pop twice in a single session.
+ * Reminders are de-duplicated via the store's persisted `firedAt` record, so
+ * the same event won't pop twice — even across an app restart.
  */
 export function useReminderScanner() {
   const events = useCalendarStore((s) => s.events)

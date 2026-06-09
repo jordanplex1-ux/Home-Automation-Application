@@ -24,5 +24,12 @@ export const IPC = {
   GOOGLE_AUTH_LIST_ACCOUNTS: 'google:auth-list-accounts',
   GOOGLE_AUTH_DISCONNECT: 'google:auth-disconnect',
   GOOGLE_CALENDAR_LIST: 'google:calendar-list',
-  GOOGLE_EVENTS_FETCH: 'google:events-fetch'
+  GOOGLE_EVENTS_FETCH: 'google:events-fetch',
+  RING_STATUS: 'ring:status',
+  RING_LOGIN_START: 'ring:login-start',
+  RING_LOGIN_2FA: 'ring:login-2fa',
+  RING_LOGOUT: 'ring:logout',
+  RING_LIST_CAMERAS: 'ring:list-cameras',
+  RING_SNAPSHOT: 'ring:snapshot',
+  RING_EVENT: 'ring:event'
 } as const

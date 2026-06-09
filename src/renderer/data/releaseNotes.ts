@@ -20,6 +20,36 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.1.7',
+    date: '2026-06-09',
+    sections: [
+      {
+        title: 'New',
+        items: [
+          'Ring integration — connect your Ring account (Settings → System) to show live camera views on the Home Automation screen',
+          'Doorbell takeover — when the Ring doorbell is pressed, the live feed pops up over whatever’s on screen (even the dim clock) and wakes the display',
+          'Optional motion alerts — opt in to also pop the live feed on motion, not just doorbell presses'
+        ]
+      },
+      {
+        title: 'Improved',
+        items: [
+          'Big visual polish: fixed an app-wide issue where text sat too close to rounded corners and panel edges — padding now renders correctly everywhere (calendar, weather, bins, the footer), and touch targets are a little larger',
+          'Today is now highlighted with a glowing ring in the month view',
+          'The calendar auto-advances to the new day at midnight, so an always-on display never shows yesterday',
+          'To-do items now show how many days they’ve been on the list (turning amber once over a week old)',
+          'News ticker “LIVE” badge moved to the bottom-centre so it no longer overlaps the first headline'
+        ]
+      },
+      {
+        title: 'Fixed',
+        items: [
+          'Calendar reminders now survive an app restart — they won’t re-fire or go missing'
+        ]
+      }
+    ]
+  },
+  {
     version: '0.1.6',
     date: '2026-05-13',
     sections: [

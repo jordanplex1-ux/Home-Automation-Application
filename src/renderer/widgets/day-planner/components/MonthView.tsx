@@ -90,22 +90,41 @@ export function MonthView({ selectedDate, events, onSelectDate, onSwitchToDay, o
           const today = isToday(day)
           const selected = isSameDay(day, selectedDate)
 
+          // Visual priority: today gets a glowing accent ring so it stands
+          // out at a glance; selection (a tap) layers a fill on top. A cell
+          // can be both today and selected.
+          const cellClasses = today
+            ? 'bg-accent-primary/15 ring-2 ring-accent-primary shadow-glow-md'
+            : selected
+            ? 'bg-accent-primary/10 ring-1 ring-accent-primary/40'
+            : 'hover:bg-bg-hover'
+
           return (
             <button
               key={dateStr}
               onClick={() => onSelectDate(day)}
               onDoubleClick={() => onSwitchToDay(day)}
-              className={`flex flex-col rounded-lg p-1.5 transition-all touch-manipulation overflow-hidden min-h-0
+              // Padding is set inline rather than via a Tailwind class: the
+              // global `* { padding: 0 }` reset in globals.css overrides utility
+              // padding here, which previously left the day number flush in the
+              // corner where the rounded edge clipped it. Inline styles win.
+              style={{ padding: '8px' }}
+              className={`flex flex-col rounded-lg transition-all touch-manipulation overflow-hidden min-h-0
                 ${!inMonth ? 'opacity-30' : ''}
-                ${selected ? 'bg-accent-primary/10 ring-1 ring-accent-primary/40' : 'hover:bg-bg-hover'}
+                ${cellClasses}
               `}
             >
-              {/* Day number */}
-              <p className={`text-xs text-right pr-0.5 shrink-0 ${
-                today ? 'text-accent-primary font-bold' : 'text-text-secondary'
-              }`}>
-                {format(day, 'd')}
-              </p>
+              {/* Day number — today shown as a filled accent chip. The extra
+                  inline inset keeps the digit clear of the 8px rounded corner. */}
+              <div className="flex justify-end shrink-0" style={{ paddingRight: '3px', paddingTop: '2px' }}>
+                <span className={`text-xs leading-none ${
+                  today
+                    ? 'flex items-center justify-center w-5 h-5 rounded-full bg-accent-primary text-bg-primary font-bold shadow-glow-sm'
+                    : 'text-text-secondary'
+                }`}>
+                  {format(day, 'd')}
+                </span>
+              </div>
 
               {/* Event dots / compact list */}
               <div className="flex-1 flex flex-col gap-px overflow-hidden min-h-0 mt-0.5">

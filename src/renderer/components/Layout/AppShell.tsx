@@ -20,6 +20,7 @@ import { useAppSettingsStore } from '../../stores/useAppSettingsStore'
 import { useInactivityTimer } from '../../hooks/useInactivityTimer'
 import { useReminderScanner } from '../../hooks/useReminderScanner'
 import { ReminderBanner } from './ReminderBanner'
+import { DoorbellPopup, type CameraAlert } from './DoorbellPopup'
 import { IconButton } from '../ui/IconButton'
 import { PinModal } from '../ui/PinModal'
 import { Toaster } from '../ui/Toaster'
@@ -43,6 +44,7 @@ export function AppShell() {
   const [shortcutHelpOpen, setShortcutHelpOpen] = useState(false)
   const [dimmed, setDimmed] = useState(false)
   const [pinPromptOpen, setPinPromptOpen] = useState(false)
+  const [cameraAlert, setCameraAlert] = useState<CameraAlert | null>(null)
 
   // Locking is always free; unlocking prompts for the PIN when the feature
   // is on and a hash has been set.
@@ -87,6 +89,19 @@ export function AppShell() {
   // Calendar reminders — scan local events twice a minute and fire banners
   // for any that have entered their reminder window.
   useReminderScanner()
+
+  // Ring alerts — a doorbell press always takes over the screen with the live
+  // feed (regardless of active screen or dim state). Motion does the same only
+  // when the user has opted into motion alerts. Read the latest setting from
+  // the store inside the handler so toggling it doesn't require re-subscribing.
+  useEffect(() => {
+    const off = window.electronAPI?.ring?.onEvent((event) => {
+      if (event.kind === 'motion' && !useAppSettingsStore.getState().ringMotionAlerts) return
+      setDimmed(false) // wake the display so the feed is visible
+      setCameraAlert({ id: event.cameraId, name: event.cameraName, kind: event.kind })
+    })
+    return off
+  }, [])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -180,6 +195,7 @@ export function AppShell() {
       <DimOverlay active={dimmed} onWake={() => setDimmed(false)} />
       <UpdateBanner />
       <ReminderBanner />
+      <DoorbellPopup alert={cameraAlert} onClose={() => setCameraAlert(null)} />
       <Toaster />
     </div>
   )

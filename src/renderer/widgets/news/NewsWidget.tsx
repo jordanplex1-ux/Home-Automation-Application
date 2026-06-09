@@ -109,14 +109,6 @@ function Ticker({ items, speed }: TickerProps) {
       <div className="pointer-events-none absolute left-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-r from-bg-secondary to-transparent" />
       <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 z-10 bg-gradient-to-l from-bg-secondary to-transparent" />
 
-      {/* "LIVE" pill on the left */}
-      <div className="shrink-0 z-20 flex items-center gap-1.5 px-2 py-1 mr-3 rounded-md bg-accent-danger/15 border border-accent-danger/30">
-        <span className="w-1.5 h-1.5 rounded-full bg-accent-danger animate-pulse" />
-        <span className="text-[10px] font-semibold text-accent-danger uppercase tracking-wider">
-          Live
-        </span>
-      </div>
-
       <div
         ref={stripRef}
         className="flex gap-8 whitespace-nowrap anim-ticker will-change-transform"
@@ -134,6 +126,16 @@ function Ticker({ items, speed }: TickerProps) {
             <span className="text-sm text-text-primary">{item.title}</span>
           </div>
         ))}
+      </div>
+
+      {/* "LIVE" pill — centred along the bottom edge so it no longer crowds
+          the first headline. Semi-opaque backdrop keeps it readable as
+          headlines scroll behind it. */}
+      <div className="pointer-events-none absolute bottom-0.5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-bg-secondary/90 border border-accent-danger/30 backdrop-blur-sm">
+        <span className="w-1.5 h-1.5 rounded-full bg-accent-danger animate-pulse" />
+        <span className="text-[10px] font-semibold text-accent-danger uppercase tracking-wider">
+          Live
+        </span>
       </div>
     </div>
   )

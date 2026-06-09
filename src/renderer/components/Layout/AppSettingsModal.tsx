@@ -10,6 +10,7 @@ import { GoogleCalendarSettings } from './GoogleCalendarSettings'
 import { DevPanel } from './DevPanel'
 import { EditLockSettings } from './EditLockSettings'
 import { LayoutPresetManager } from './LayoutPresetManager'
+import { RingSettings } from './RingSettings'
 import { RELEASE_NOTES } from '../../data/releaseNotes'
 
 interface AppSettingsModalProps {
@@ -380,6 +381,14 @@ export function AppSettingsModal({ open, onClose }: AppSettingsModalProps) {
                 Google Calendar
               </label>
               <GoogleCalendarSettings />
+            </div>
+
+            {/* Ring cameras */}
+            <div>
+              <label className="text-xs text-text-secondary mb-2 block uppercase tracking-wider">
+                Ring Cameras
+              </label>
+              <RingSettings />
             </div>
 
             {/* Backup */}
