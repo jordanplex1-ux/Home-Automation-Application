@@ -1,5 +1,6 @@
 import { app, BrowserWindow, powerSaveBlocker } from 'electron'
 import { join } from 'path'
+import { existsSync } from 'fs'
 import { setupStoreIPC } from './store'
 import { setupBinsIPC } from './bins'
 import { setupWindowIPC } from './window'
@@ -19,11 +20,18 @@ if (!gotTheLock) {
 }
 
 function createWindow(): void {
+  // Window/taskbar icon. In a packaged build the taskbar uses the .exe icon
+  // (set by electron-builder from build/icon.ico); this mainly covers dev mode.
+  // Falls back to the default icon if the file isn't present.
+  const devIcon = join(__dirname, '../../build/icon.png')
+  const icon = existsSync(devIcon) ? devIcon : undefined
+
   mainWindow = new BrowserWindow({
     fullscreen: true,
     frame: false,
     autoHideMenuBar: true,
     backgroundColor: '#0a0a0f',
+    ...(icon ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/preload.js'),
       contextIsolation: true,

@@ -20,6 +20,27 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.1.9',
+    date: '2026-06-16',
+    sections: [
+      {
+        title: 'New',
+        items: [
+          'HomeSync app icon — replaces the default Electron icon on the window, taskbar, and installer',
+          'Overlapping calendar events now split into side-by-side columns instead of stacking on top of each other'
+        ]
+      },
+      {
+        title: 'Improved',
+        items: [
+          'Finer widget resize grid — tiles now snap in smaller increments for more precise sizing (existing layouts are kept at their current size)',
+          'The dashboard layout no longer shifts when the window is minimised and restored',
+          'Ring sign-in reworked: the 2FA step no longer hangs after entering the code, camera-fetch errors are surfaced, and there’s a new refresh-cameras button'
+        ]
+      }
+    ]
+  },
+  {
     version: '0.1.8',
     date: '2026-06-09',
     sections: [

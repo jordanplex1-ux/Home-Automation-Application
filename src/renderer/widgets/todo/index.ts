@@ -11,6 +11,6 @@ registerWidget({
   component: TodoWidget,
   settingsComponent: TodoSettings,
   defaultConfig: { autoDeleteMs: 24 * 60 * 60 * 1000 }, // 1 day
-  defaultLayout: { w: 3, h: 4, minW: 2, minH: 2 },
+  defaultLayout: { w: 6, h: 8, minW: 4, minH: 4 },
   category: 'utility'
 })

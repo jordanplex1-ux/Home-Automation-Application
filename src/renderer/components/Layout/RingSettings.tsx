@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Video, Trash2, LogIn } from 'lucide-react'
+import { Video, Trash2, LogIn, RefreshCw } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { useRingStatus } from '../../hooks/useRingStatus'
@@ -23,6 +23,7 @@ export function RingSettings() {
   const [code, setCode] = useState('')
   const [prompt, setPrompt] = useState('')
   const [confirmLogout, setConfirmLogout] = useState(false)
+  const [refreshingCams, setRefreshingCams] = useState(false)
 
   if (!available) {
     return (
@@ -91,6 +92,20 @@ export function RingSettings() {
     toast.success('Ring disconnected')
   }
 
+  const handleRefreshCameras = async () => {
+    setRefreshingCams(true)
+    try {
+      const res = await api.listCameras()
+      refresh()
+      if (res.ok) toast.success(`Found ${res.cameras.length} camera${res.cameras.length === 1 ? '' : 's'}`)
+      else toast.error(res.message || 'Could not fetch cameras')
+    } catch (err) {
+      toast.error((err as Error).message)
+    } finally {
+      setRefreshingCams(false)
+    }
+  }
+
   // ---- Connected view ----
   if (status.configured) {
     return (
@@ -108,6 +123,14 @@ export function RingSettings() {
                   : `${status.cameras.length} camera${status.cameras.length === 1 ? '' : 's'}`}
               </p>
             </div>
+            <button
+              onClick={handleRefreshCameras}
+              aria-label="Refresh cameras"
+              disabled={refreshingCams}
+              className="shrink-0 h-8 w-8 rounded-lg flex items-center justify-center text-text-disabled hover:text-text-primary hover:bg-bg-hover transition-colors touch-manipulation disabled:opacity-40"
+            >
+              <RefreshCw size={14} className={refreshingCams ? 'animate-spin' : ''} />
+            </button>
             <button
               onClick={() => setConfirmLogout(true)}
               aria-label="Disconnect Ring"

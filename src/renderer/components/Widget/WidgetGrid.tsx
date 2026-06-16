@@ -7,11 +7,14 @@ import 'react-grid-layout/css/styles.css'
 
 const ResponsiveGrid = WidthProvider(Responsive)
 
-const COLS = { lg: 12, md: 8, sm: 4, xs: 2 }
-const ROW_HEIGHT = 80
+// Doubled column count and halved row height vs. the original 12/80 grid so
+// widgets snap in finer increments (more tile-size customisation). Persisted
+// layouts from the old grid are scaled ×2 by the store's migrate() so they
+// keep their visual size.
+const COLS = { lg: 24, md: 16, sm: 8, xs: 4 }
+const ROW_HEIGHT = 40
 // Gap between widgets, and (since containerPadding defaults to this) the gap
-// from the widgets to the screen edge. Halved from [12,12] to tighten the
-// generous blank space on the portrait wall panel.
+// from the widgets to the screen edge.
 const MARGIN: [number, number] = [6, 6]
 
 export function WidgetGrid() {
@@ -37,6 +40,11 @@ export function WidgetGrid() {
 
   const onLayoutChange = useCallback(
     (current: Layout[]) => {
+      // Only persist deliberate edits. When not editing, width changes from
+      // minimising/maximising the window make react-grid-layout reflow
+      // transiently; persisting that would permanently shift the layout and it
+      // wouldn't return to its original arrangement on restore.
+      if (!useWidgetStore.getState().isEditing) return
       updateLayouts(current)
     },
     [updateLayouts]

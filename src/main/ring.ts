@@ -37,8 +37,10 @@ let ringApi: RingApi | null = null
 let cameras: RingCamera[] = []
 let pendingLoginClient: RingRestClient | null = null // held between login-start and 2fa
 let lastError: string | null = null
-// rxjs subscriptions we need to tear down on re-init / logout
+// rxjs subscriptions. API-level (token rotation) live for the API's lifetime;
+// per-camera event subs are reset every time we (re)load cameras.
 const subscriptions: { unsubscribe: () => void }[] = []
+const cameraSubs: { unsubscribe: () => void }[] = []
 
 function broadcast(channel: string, payload: unknown): void {
   for (const win of BrowserWindow.getAllWindows()) {
@@ -46,8 +48,8 @@ function broadcast(channel: string, payload: unknown): void {
   }
 }
 
-function clearSubscriptions(): void {
-  for (const sub of subscriptions.splice(0)) {
+function clearSubs(list: { unsubscribe: () => void }[]): void {
+  for (const sub of list.splice(0)) {
     try {
       sub.unsubscribe()
     } catch {
@@ -57,67 +59,72 @@ function clearSubscriptions(): void {
 }
 
 // ---------------------------------------------------------------------------
-// Initialise the API from a stored refresh token and wire up camera events.
+// Connect the API from a refresh token. Returns as soon as the API object is
+// built and authenticating — camera fetching happens in the background via
+// loadCameras() so a slow/failed device call never blocks (or hangs) login.
 // ---------------------------------------------------------------------------
 
-async function initFromRefreshToken(refreshToken: string): Promise<void> {
+async function connectRingApi(refreshToken: string): Promise<void> {
   const { RingApi: RingApiCtor } = await import('ring-client-api')
 
-  clearSubscriptions()
+  clearSubs(cameraSubs)
+  clearSubs(subscriptions)
+  cameras = []
+  lastError = null
 
   ringApi = new RingApiCtor({
     refreshToken,
     systemId: getSystemId(),
-    // Poll camera status so battery/online state stays current. Snapshots are
-    // pulled on demand by the renderer.
     cameraStatusPollingSeconds: 60,
-    // Avoid forcing fresh snapshots that drain battery cams — use cached where
-    // Ring allows.
     avoidSnapshotBatteryDrain: true
   })
 
   // Persist rotated refresh tokens — Ring rotates them periodically and the
   // old one stops working, so we must save the new one or auth silently dies.
   const tokenSub = ringApi.onRefreshTokenUpdated.subscribe(({ newRefreshToken }) => {
-    store.set('refreshToken', newRefreshToken)
+    if (newRefreshToken) store.set('refreshToken', newRefreshToken)
   })
   subscriptions.push(tokenSub)
 
-  cameras = await ringApi.getCameras()
-  lastError = null
+  broadcast(IPC.RING_STATUS, buildStatus())
+  // Fetch cameras without blocking the caller (login handler / startup).
+  void loadCameras()
+}
 
-  for (const camera of cameras) {
-    // Doorbell button press → the "alert" that pops the live feed over
-    // everything. Broadcast to all windows; the renderer owns the overlay.
-    const dingSub = camera.onDoorbellPressed.subscribe(() => {
-      broadcast(IPC.RING_EVENT, {
-        kind: 'ding',
-        cameraId: camera.id,
-        cameraName: camera.name,
-        at: Date.now()
-      })
-    })
-    // Motion is broadcast too (renderer decides whether to surface it) but
-    // doesn't force the takeover popup by default — motion is noisy.
-    const motionSub = camera.onMotionDetected.subscribe((motion) => {
-      if (!motion) return
-      broadcast(IPC.RING_EVENT, {
-        kind: 'motion',
-        cameraId: camera.id,
-        cameraName: camera.name,
-        at: Date.now()
-      })
-    })
-    subscriptions.push(dingSub, motionSub)
+/** Fetch cameras and (re)wire their event subscriptions. Surfaces errors via lastError. */
+async function loadCameras(): Promise<void> {
+  if (!ringApi) return
+  clearSubs(cameraSubs)
+  try {
+    const found = await ringApi.getCameras()
+    cameras = found
+    lastError = found.length === 0 ? 'Connected, but no cameras were found on this Ring account.' : null
+    console.log(`[ring] getCameras returned ${found.length} camera(s)`)
+
+    for (const camera of found) {
+      try {
+        const dingSub = camera.onDoorbellPressed.subscribe(() =>
+          broadcast(IPC.RING_EVENT, { kind: 'ding', cameraId: camera.id, cameraName: camera.name, at: Date.now() })
+        )
+        const motionSub = camera.onMotionDetected.subscribe((motion) => {
+          if (motion) broadcast(IPC.RING_EVENT, { kind: 'motion', cameraId: camera.id, cameraName: camera.name, at: Date.now() })
+        })
+        cameraSubs.push(dingSub, motionSub)
+      } catch (e) {
+        console.warn(`[ring] event subscribe failed for ${camera.name}:`, (e as Error).message)
+      }
+    }
+  } catch (err) {
+    lastError = (err as Error).message
+    console.warn('[ring] getCameras failed:', lastError)
   }
-
   broadcast(IPC.RING_STATUS, buildStatus())
 }
 
 function buildStatus() {
   return {
     configured: !!store.get('refreshToken'),
-    connected: !!ringApi && cameras.length >= 0 && lastError === null,
+    connected: !!ringApi,
     error: lastError,
     cameras: cameras.map((c) => ({ id: c.id, name: c.name }))
   }
@@ -141,14 +148,16 @@ export function setupRingIPC(): void {
     try {
       const { RingRestClient: RestClientCtor } = await import('ring-client-api/rest-client')
       pendingLoginClient = new RestClientCtor({ email, password, systemId: getSystemId() })
-      const auth = await pendingLoginClient.getCurrentAuth()
+      // getAuth() directly (not getCurrentAuth, which caches the rejected
+      // promise) — on a 2FA account this throws after triggering the code and
+      // sets using2fa/promptFor2fa.
+      const auth = await pendingLoginClient.getAuth()
       // No 2FA on the account — we already have a refresh token.
       store.set('refreshToken', auth.refresh_token)
-      await initFromRefreshToken(auth.refresh_token)
+      await connectRingApi(auth.refresh_token)
       pendingLoginClient = null
       return { ok: true as const, needs2fa: false as const }
     } catch (err) {
-      // When 2FA is enabled, getCurrentAuth throws after triggering the code.
       if (pendingLoginClient?.using2fa) {
         return {
           ok: true as const,
@@ -161,7 +170,9 @@ export function setupRingIPC(): void {
     }
   })
 
-  // Step 2 of login: the 2FA code.
+  // Step 2 of login: the 2FA code. Returns as soon as the token is saved and
+  // the API is connecting — cameras load in the background and arrive via a
+  // RING_STATUS broadcast, so the UI never hangs waiting on getCameras.
   ipcMain.handle(IPC.RING_LOGIN_2FA, async (_e, code: string) => {
     if (!pendingLoginClient) {
       return { ok: false as const, message: 'No login in progress — start again.' }
@@ -169,7 +180,7 @@ export function setupRingIPC(): void {
     try {
       const auth = await pendingLoginClient.getAuth(code)
       store.set('refreshToken', auth.refresh_token)
-      await initFromRefreshToken(auth.refresh_token)
+      await connectRingApi(auth.refresh_token)
       pendingLoginClient = null
       return { ok: true as const }
     } catch (err) {
@@ -178,7 +189,8 @@ export function setupRingIPC(): void {
   })
 
   ipcMain.handle(IPC.RING_LOGOUT, () => {
-    clearSubscriptions()
+    clearSubs(cameraSubs)
+    clearSubs(subscriptions)
     ringApi = null
     cameras = []
     pendingLoginClient = null
@@ -188,14 +200,13 @@ export function setupRingIPC(): void {
     return { ok: true as const }
   })
 
+  // Manual re-fetch of cameras (used by the "Refresh cameras" button).
   ipcMain.handle(IPC.RING_LIST_CAMERAS, async () => {
     if (!ringApi) return { ok: false as const, message: 'Ring not connected', cameras: [] }
-    try {
-      cameras = await ringApi.getCameras()
-      return { ok: true as const, cameras: cameras.map((c) => ({ id: c.id, name: c.name })) }
-    } catch (err) {
-      return { ok: false as const, message: (err as Error).message, cameras: [] }
-    }
+    await loadCameras()
+    return lastError
+      ? { ok: false as const, message: lastError, cameras: cameras.map((c) => ({ id: c.id, name: c.name })) }
+      : { ok: true as const, cameras: cameras.map((c) => ({ id: c.id, name: c.name })) }
   })
 
   // Returns a JPEG snapshot as a data URL for the renderer to show.
@@ -213,7 +224,7 @@ export function setupRingIPC(): void {
   // Auto-connect on startup if we have a stored refresh token.
   const existing = store.get('refreshToken')
   if (existing) {
-    initFromRefreshToken(existing).catch((err) => {
+    connectRingApi(existing).catch((err) => {
       lastError = (err as Error).message
       console.warn('[ring] Auto-connect failed:', lastError)
       broadcast(IPC.RING_STATUS, buildStatus())

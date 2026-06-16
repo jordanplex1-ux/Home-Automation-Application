@@ -11,7 +11,7 @@ registerWidget({
   component: WeatherWidget,
   settingsComponent: WeatherSettings,
   defaultConfig: { apiKey: '', lat: '', lon: '', showAirQuality: true },
-  defaultLayout: { w: 4, h: 3, minW: 3, minH: 2 },
+  defaultLayout: { w: 8, h: 6, minW: 6, minH: 4 },
   refreshInterval: 15 * 60 * 1000,
   queryKeyPrefixes: ['weather', 'air-quality'],
   category: 'info'

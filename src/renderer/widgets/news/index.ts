@@ -15,7 +15,7 @@ registerWidget({
     speed: 'medium'
   },
   // Wide and short — the classic ticker shape
-  defaultLayout: { w: 12, h: 1, minW: 4, minH: 1 },
+  defaultLayout: { w: 24, h: 2, minW: 8, minH: 2 },
   refreshInterval: 15 * 60 * 1000,
   queryKeyPrefixes: ['news'],
   category: 'info'

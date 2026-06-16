@@ -117,6 +117,25 @@ export const useWidgetStore = create<WidgetState>()(
       partialize: (state) => ({
         instances: state.instances
       }),
+      // v2: the grid went from 12 cols / 80px rows to 24 cols / 40px rows, so
+      // layouts saved under v1 must double to keep their visual size. Stored
+      // data with no version is treated as v0/v1 and migrated.
+      version: 2,
+      migrate: (persisted, fromVersion) => {
+        const state = persisted as { instances?: WidgetInstance[] } | undefined
+        if (state?.instances && fromVersion < 2) {
+          state.instances = state.instances.map((i) => ({
+            ...i,
+            layout: {
+              x: i.layout.x * 2,
+              y: i.layout.y * 2,
+              w: i.layout.w * 2,
+              h: i.layout.h * 2
+            }
+          }))
+        }
+        return state as { instances: WidgetInstance[] }
+      },
       // Drop any persisted instance whose widgetId is no longer registered
       // (e.g. the removed Placeholder widget). Leaves valid widgets untouched.
       onRehydrateStorage: () => (state) => {

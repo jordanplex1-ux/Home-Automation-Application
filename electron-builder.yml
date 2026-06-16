@@ -23,8 +23,8 @@ win:
     - target: portable
       arch:
         - x64
-  # Icon is optional. Drop a 256x256 .ico into ./build/icon.ico to use a custom one.
-  # icon: build/icon.ico
+  # HomeSync app icon — requires ./build/icon.ico (256x256+ multi-resolution).
+  icon: build/icon.ico
 
 nsis:
   oneClick: false

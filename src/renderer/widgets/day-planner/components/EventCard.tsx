@@ -5,20 +5,36 @@ interface EventCardProps {
   event: CalendarEvent
   onDelete: (id: string) => void
   hourHeight: number
+  /** Column index within an overlap cluster (0-based). */
+  col?: number
+  /** Total columns in this event's overlap cluster. */
+  cols?: number
 }
+
+// Track geometry — must match TimelineView: 64px hour-label gutter on the
+// left, 8px padding on the right.
+const GUTTER = 64
+const RIGHT_PAD = 8
+const COL_GAP = 4
 
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number)
   return h * 60 + m
 }
 
-export function EventCard({ event, onDelete, hourHeight }: EventCardProps) {
+export function EventCard({ event, onDelete, hourHeight, col = 0, cols = 1 }: EventCardProps) {
   const startMin = timeToMinutes(event.startTime)
   const endMin = timeToMinutes(event.endTime)
   const durationMin = Math.max(endMin - startMin, 15)
 
   const top = (startMin / 60) * hourHeight
   const height = Math.max((durationMin / 60) * hourHeight - 2, 28)
+
+  // Split overlapping events into side-by-side columns. The track spans from
+  // GUTTER to (100% - RIGHT_PAD); each of `cols` columns gets an equal slice.
+  const track = `(100% - ${GUTTER + RIGHT_PAD}px)`
+  const left = `calc(${GUTTER}px + ${col} * ${track} / ${cols})`
+  const width = `calc(${track} / ${cols} - ${cols > 1 ? COL_GAP : 0}px)`
 
   // Google Calendar events are read-only here — they're sourced from the
   // user's actual Google account. We hide the delete button on them to avoid
@@ -27,10 +43,12 @@ export function EventCard({ event, onDelete, hourHeight }: EventCardProps) {
 
   return (
     <div
-      className="absolute left-16 right-2 rounded-xl px-3 py-1.5 overflow-hidden group transition-all duration-200 hover:brightness-110 touch-manipulation"
+      className="absolute rounded-xl px-3 py-1.5 overflow-hidden group transition-all duration-200 hover:brightness-110 touch-manipulation"
       style={{
         top: `${top}px`,
         height: `${height}px`,
+        left,
+        width,
         backgroundColor: `${event.color}22`,
         borderLeft: `3px solid ${event.color}`
       }}

@@ -4,6 +4,10 @@ dist/
 dist-electron/
 release/
 
+# Local Claude Code config (launch.json, local settings, locks) — kept out of
+# the repo deliberately.
+.claude/
+
 # Local secrets — keep .env.example committed so contributors know the schema,
 # but every other .env variant stays local.
 .env

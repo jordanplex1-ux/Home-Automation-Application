@@ -11,6 +11,6 @@ registerWidget({
   component: DayPlannerWidget,
   settingsComponent: DayPlannerSettings,
   defaultConfig: { showMiniCalendar: true },
-  defaultLayout: { w: 6, h: 5, minW: 4, minH: 3 },
+  defaultLayout: { w: 12, h: 10, minW: 8, minH: 6 },
   category: 'core'
 })
