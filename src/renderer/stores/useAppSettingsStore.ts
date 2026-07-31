@@ -90,6 +90,13 @@ interface AppSettingsState {
   // Ring: doorbell presses always pop the live feed; motion is opt-in since it
   // can be noisy.
   ringMotionAlerts: boolean
+  /**
+   * Which Ring cameras appear on the Home Automation screen.
+   * `null` means "not configured yet" → show them all, so a newly added camera
+   * appears automatically. An empty array means the user deliberately hid all.
+   */
+  ringSelectedCameraIds: number[] | null
+  setRingSelectedCameraIds: (ids: number[] | null) => void
   setRingMotionAlerts: (enabled: boolean) => void
 }
 
@@ -142,7 +149,9 @@ export const useAppSettingsStore = create<AppSettingsState>()(
       setEditLock: (enabled, pinHash) =>
         set({ editLockEnabled: enabled, editLockPinHash: pinHash }),
       ringMotionAlerts: false,
-      setRingMotionAlerts: (enabled) => set({ ringMotionAlerts: enabled })
+      setRingMotionAlerts: (enabled) => set({ ringMotionAlerts: enabled }),
+      ringSelectedCameraIds: null,
+      setRingSelectedCameraIds: (ids) => set({ ringSelectedCameraIds: ids })
     }),
     {
       name: 'app-settings',

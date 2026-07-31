@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Cpu, Construction, Video, Home, AlertTriangle } from 'lucide-react'
 import { useRingStatus } from '../../hooks/useRingStatus'
+import { useAppSettingsStore } from '../../stores/useAppSettingsStore'
 import { useHaStore, sortEntities } from '../../stores/useHaStore'
 import { CameraSnapshot } from './homeAutomation/CameraSnapshot'
 import { EntityTile } from './homeAutomation/EntityTile'
@@ -12,7 +13,17 @@ export function HomeAutomation() {
   const entityMap = useHaStore((s) => s.entities)
   const entities = useMemo(() => sortEntities(entityMap), [entityMap])
 
-  const hasCameras = ringAvailable && ringStatus.configured && ringStatus.cameras.length > 0
+  // null = not configured yet, so show every camera.
+  const selectedCameraIds = useAppSettingsStore((s) => s.ringSelectedCameraIds)
+  const visibleCameras = useMemo(
+    () =>
+      selectedCameraIds === null
+        ? ringStatus.cameras
+        : ringStatus.cameras.filter((c) => selectedCameraIds.includes(c.id)),
+    [ringStatus.cameras, selectedCameraIds]
+  )
+
+  const hasCameras = ringAvailable && ringStatus.configured && visibleCameras.length > 0
   const hasEntities = entities.length > 0
   const haConnecting = haStatus.configured && haStatus.state !== 'connected'
 
@@ -92,7 +103,7 @@ export function HomeAutomation() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-            {ringStatus.cameras.map((cam) => (
+            {visibleCameras.map((cam) => (
               <CameraSnapshot
                 key={cam.id}
                 cameraId={cam.id}

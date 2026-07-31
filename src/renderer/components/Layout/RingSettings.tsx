@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Video, Trash2, LogIn, RefreshCw } from 'lucide-react'
+import { Video, Trash2, LogIn, RefreshCw, Check } from 'lucide-react'
 import { Button } from '../ui/Button'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { useRingStatus } from '../../hooks/useRingStatus'
@@ -16,6 +16,21 @@ export function RingSettings() {
   const { status, available, refresh } = useRingStatus()
   const ringMotionAlerts = useAppSettingsStore((s) => s.ringMotionAlerts)
   const setRingMotionAlerts = useAppSettingsStore((s) => s.setRingMotionAlerts)
+  const selectedCameraIds = useAppSettingsStore((s) => s.ringSelectedCameraIds)
+  const setSelectedCameraIds = useAppSettingsStore((s) => s.setRingSelectedCameraIds)
+
+  // null = never configured, so everything shows by default.
+  const isCameraShown = (id: number) => selectedCameraIds === null || selectedCameraIds.includes(id)
+  const shownCount = status.cameras.filter((c) => isCameraShown(c.id)).length
+
+  const toggleCamera = (id: number) => {
+    // Materialise "all" into a concrete list the first time it's touched, so
+    // unticking one camera doesn't read as "hide everything".
+    const current = selectedCameraIds ?? status.cameras.map((c) => c.id)
+    setSelectedCameraIds(
+      current.includes(id) ? current.filter((x) => x !== id) : [...current, id]
+    )
+  }
 
   const [step, setStep] = useState<Step>('idle')
   const [email, setEmail] = useState('')
@@ -140,15 +155,44 @@ export function RingSettings() {
             </button>
           </div>
 
-          {status.cameras.map((c) => (
-            <div
-              key={c.id}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-bg-tertiary/50 text-sm text-text-secondary"
-            >
-              <Video size={13} className="text-text-disabled" />
-              {c.name}
-            </div>
-          ))}
+          {status.cameras.length > 0 && (
+            <p className="text-[10px] text-text-disabled uppercase tracking-wider px-1 mt-1">
+              Show on Home Automation
+            </p>
+          )}
+
+          {status.cameras.map((c) => {
+            const shown = isCameraShown(c.id)
+            return (
+              <button
+                key={c.id}
+                onClick={() => toggleCamera(c.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm text-left transition-all touch-manipulation ${
+                  shown
+                    ? 'bg-accent-primary/10 border-accent-primary/30 text-text-primary'
+                    : 'bg-bg-tertiary/50 border-border-subtle text-text-secondary hover:bg-bg-hover'
+                }`}
+              >
+                <div
+                  className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                    shown
+                      ? 'bg-accent-primary border-accent-primary text-bg-primary'
+                      : 'border-border-subtle'
+                  }`}
+                >
+                  {shown && <Check size={11} strokeWidth={3} />}
+                </div>
+                <Video size={13} className={shown ? 'text-accent-primary' : 'text-text-disabled'} />
+                <span className="flex-1 min-w-0 truncate">{c.name}</span>
+              </button>
+            )
+          })}
+
+          {status.cameras.length > 0 && shownCount === 0 && (
+            <p className="text-[10px] text-accent-warning px-1">
+              No cameras selected — the Home Automation screen won’t show any live views.
+            </p>
+          )}
 
           {/* Motion alert opt-in */}
           <button

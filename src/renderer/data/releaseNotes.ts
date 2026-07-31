@@ -20,6 +20,18 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.2.1',
+    date: '2026-07-31',
+    sections: [
+      {
+        title: 'New',
+        items: [
+          'Choose which Ring cameras appear on the Home Automation screen — tick them in Settings → System → Ring Cameras. New cameras show automatically until you change the selection, and doorbell alerts still work for every camera whether it is displayed or not'
+        ]
+      }
+    ]
+  },
+  {
     version: '0.2.0',
     date: '2026-07-31',
     sections: [
