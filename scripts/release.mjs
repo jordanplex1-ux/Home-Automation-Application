@@ -70,6 +70,9 @@ function run(cmd, args) {
   }
 }
 
+// Rewrite @shinyoshiaki/binary-data's nested node_modules before packaging —
+// electron-builder prunes it and ring-client-api dies at runtime otherwise.
+run('node', ['./scripts/patch-binary-data.mjs'])
 run('electron-vite', ['build'])
 run('electron-builder', [
   '--win',

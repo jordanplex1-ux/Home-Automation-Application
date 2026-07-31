@@ -20,6 +20,18 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.2.2',
+    date: '2026-07-31',
+    sections: [
+      {
+        title: 'Fixed',
+        items: [
+          'Ring failed to connect in the installed app with a “cannot find module” error — a dependency shipped part of itself in a folder the installer was stripping out. Ring now works in installed builds, not just development'
+        ]
+      }
+    ]
+  },
+  {
     version: '0.2.1',
     date: '2026-07-31',
     sections: [

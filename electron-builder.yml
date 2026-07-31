@@ -10,6 +10,11 @@ directories:
 files:
   - out/**/*
   - package.json
+  # NOTE: @shinyoshiaki/binary-data (ring-client-api -> werift) ships its own
+  # internals in a nested node_modules folder, which electron-builder prunes.
+  # scripts/patch-binary-data.mjs relocates and rewrites it before packaging —
+  # see that file. Adding a `files` glob here does NOT work; the pruning
+  # happens regardless.
 
 asar: true
 asarUnpack:
