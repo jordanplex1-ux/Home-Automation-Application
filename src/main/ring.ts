@@ -2,6 +2,7 @@ import { ipcMain, BrowserWindow } from 'electron'
 import { randomUUID } from 'crypto'
 import Store from 'electron-store'
 import { IPC } from '../shared/ipc-channels'
+import { protect, unprotectAndUpgrade } from './secure-store'
 import type { RingApi, RingCamera } from 'ring-client-api'
 import type { RingRestClient } from 'ring-client-api/rest-client'
 
@@ -27,6 +28,22 @@ function getSystemId(): string {
     store.set('systemId', id)
   }
   return id
+}
+
+// The Ring refresh token is a full account credential — encrypt it at rest via
+// the OS keystore. Tokens written before encryption existed are migrated the
+// first time they're read.
+function saveRefreshToken(token: string | null): void {
+  store.set('refreshToken', token ? protect(token) : null)
+}
+
+function loadRefreshToken(): string | null {
+  const { value, upgraded } = unprotectAndUpgrade(store.get('refreshToken'))
+  if (upgraded) {
+    store.set('refreshToken', upgraded)
+    console.log('[ring] Migrated stored refresh token to encrypted storage')
+  }
+  return value
 }
 
 // ---------------------------------------------------------------------------
@@ -82,7 +99,7 @@ async function connectRingApi(refreshToken: string): Promise<void> {
   // Persist rotated refresh tokens — Ring rotates them periodically and the
   // old one stops working, so we must save the new one or auth silently dies.
   const tokenSub = ringApi.onRefreshTokenUpdated.subscribe(({ newRefreshToken }) => {
-    if (newRefreshToken) store.set('refreshToken', newRefreshToken)
+    if (newRefreshToken) saveRefreshToken(newRefreshToken)
   })
   subscriptions.push(tokenSub)
 
@@ -153,7 +170,7 @@ export function setupRingIPC(): void {
       // sets using2fa/promptFor2fa.
       const auth = await pendingLoginClient.getAuth()
       // No 2FA on the account — we already have a refresh token.
-      store.set('refreshToken', auth.refresh_token)
+      saveRefreshToken(auth.refresh_token)
       await connectRingApi(auth.refresh_token)
       pendingLoginClient = null
       return { ok: true as const, needs2fa: false as const }
@@ -179,7 +196,7 @@ export function setupRingIPC(): void {
     }
     try {
       const auth = await pendingLoginClient.getAuth(code)
-      store.set('refreshToken', auth.refresh_token)
+      saveRefreshToken(auth.refresh_token)
       await connectRingApi(auth.refresh_token)
       pendingLoginClient = null
       return { ok: true as const }
@@ -195,7 +212,7 @@ export function setupRingIPC(): void {
     cameras = []
     pendingLoginClient = null
     lastError = null
-    store.set('refreshToken', null)
+    saveRefreshToken(null)
     broadcast(IPC.RING_STATUS, buildStatus())
     return { ok: true as const }
   })
@@ -222,7 +239,7 @@ export function setupRingIPC(): void {
   })
 
   // Auto-connect on startup if we have a stored refresh token.
-  const existing = store.get('refreshToken')
+  const existing = loadRefreshToken()
   if (existing) {
     connectRingApi(existing).catch((err) => {
       lastError = (err as Error).message

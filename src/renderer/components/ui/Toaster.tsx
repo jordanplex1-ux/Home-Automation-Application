@@ -19,8 +19,11 @@ export function Toaster() {
 
   if (toasts.length === 0) return null
 
+  // z-index must sit above modals (z-75), context menus (z-80) and the
+  // doorbell takeover (z-90) — a toast fired from inside a modal was rendering
+  // behind its backdrop, so actions looked like they did nothing.
   return (
-    <div className="fixed bottom-20 right-4 z-50 flex flex-col gap-2 pointer-events-none">
+    <div className="fixed bottom-20 right-4 z-[95] flex flex-col gap-2 pointer-events-none">
       {toasts.map((t) => {
         const Icon = ICONS[t.variant]
         return (

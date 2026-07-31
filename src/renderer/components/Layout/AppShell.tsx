@@ -19,6 +19,7 @@ import { useWidgetStore } from '../../stores/useWidgetStore'
 import { useAppSettingsStore } from '../../stores/useAppSettingsStore'
 import { useInactivityTimer } from '../../hooks/useInactivityTimer'
 import { useReminderScanner } from '../../hooks/useReminderScanner'
+import { useHaBridge } from '../../hooks/useHaBridge'
 import { ReminderBanner } from './ReminderBanner'
 import { DoorbellPopup, type CameraAlert } from './DoorbellPopup'
 import { IconButton } from '../ui/IconButton'
@@ -89,6 +90,10 @@ export function AppShell() {
   // Calendar reminders — scan local events twice a minute and fire banners
   // for any that have entered their reminder window.
   useReminderScanner()
+
+  // Keep the Home Assistant entity store in sync with the main-process
+  // WebSocket connection, app-wide (not just on the Home Automation screen).
+  useHaBridge()
 
   // Ring alerts — a doorbell press always takes over the screen with the live
   // feed (regardless of active screen or dim state). Motion does the same only

@@ -73,5 +73,36 @@ contextBridge.exposeInMainWorld('electronAPI', {
       ipcRenderer.on(IPC.RING_STATUS, handler)
       return () => ipcRenderer.removeListener(IPC.RING_STATUS, handler)
     }
+  },
+  homeAssistant: {
+    status: () => ipcRenderer.invoke(IPC.HA_STATUS),
+    getConfig: () => ipcRenderer.invoke(IPC.HA_GET_CONFIG),
+    setConfig: (patch: unknown) => ipcRenderer.invoke(IPC.HA_SET_CONFIG, patch),
+    testConnection: (url: string, token?: string) =>
+      ipcRenderer.invoke(IPC.HA_TEST_CONNECTION, url, token),
+    disconnect: () => ipcRenderer.invoke(IPC.HA_DISCONNECT),
+    getStates: () => ipcRenderer.invoke(IPC.HA_GET_STATES),
+    listEntities: () => ipcRenderer.invoke(IPC.HA_LIST_ENTITIES),
+    callService: (
+      domain: string,
+      service: string,
+      entityId?: string,
+      data?: Record<string, unknown>
+    ) => ipcRenderer.invoke(IPC.HA_CALL_SERVICE, domain, service, entityId, data),
+    onStatus: (cb: (status: unknown) => void) => {
+      const handler = (_e: unknown, status: unknown) => cb(status)
+      ipcRenderer.on(IPC.HA_STATUS, handler)
+      return () => ipcRenderer.removeListener(IPC.HA_STATUS, handler)
+    },
+    onStates: (cb: (states: unknown) => void) => {
+      const handler = (_e: unknown, states: unknown) => cb(states)
+      ipcRenderer.on(IPC.HA_STATES, handler)
+      return () => ipcRenderer.removeListener(IPC.HA_STATES, handler)
+    },
+    onStateChanged: (cb: (state: unknown) => void) => {
+      const handler = (_e: unknown, state: unknown) => cb(state)
+      ipcRenderer.on(IPC.HA_STATE_CHANGED, handler)
+      return () => ipcRenderer.removeListener(IPC.HA_STATE_CHANGED, handler)
+    }
   }
 })

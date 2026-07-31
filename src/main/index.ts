@@ -11,6 +11,7 @@ import { setupPhotosIPC } from './photos'
 import { setupNewsIPC } from './news'
 import { setupGoogleCalendarIPC } from './google-calendar'
 import { setupRingIPC } from './ring'
+import { setupHomeAssistantIPC } from './home-assistant'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -68,6 +69,7 @@ app.whenReady().then(() => {
   setupNewsIPC()
   setupGoogleCalendarIPC()
   setupRingIPC()
+  setupHomeAssistantIPC()
   createWindow()
 })
 

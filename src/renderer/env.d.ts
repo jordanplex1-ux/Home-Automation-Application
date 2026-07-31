@@ -79,6 +79,63 @@ interface ElectronAPI {
     onEvent: (cb: (event: RingEvent) => void) => () => void
     onStatus: (cb: (status: RingStatus) => void) => () => void
   }
+  homeAssistant: {
+    status: () => Promise<HaStatus>
+    getConfig: () => Promise<HaConfig>
+    setConfig: (patch: {
+      url?: string
+      token?: string
+      entityIds?: string[]
+    }) => Promise<{ ok: true }>
+    testConnection: (
+      url: string,
+      token?: string
+    ) => Promise<{ ok: boolean; message?: string; haVersion?: string }>
+    disconnect: () => Promise<{ ok: true }>
+    getStates: () => Promise<HaEntity[]>
+    listEntities: () => Promise<HaEntitySummary[]>
+    callService: (
+      domain: string,
+      service: string,
+      entityId?: string,
+      data?: Record<string, unknown>
+    ) => Promise<{ ok: true } | { ok: false; message: string }>
+    onStatus: (cb: (status: HaStatus) => void) => () => void
+    onStates: (cb: (states: HaEntity[]) => void) => () => void
+    onStateChanged: (cb: (state: HaEntity) => void) => () => void
+  }
+}
+
+interface HaStatus {
+  configured: boolean
+  state: 'disconnected' | 'connecting' | 'connected' | 'error'
+  error: string | null
+  haVersion: string | null
+  entityCount: number
+  selectedCount: number
+}
+
+interface HaConfig {
+  url: string | null
+  hasToken: boolean
+  entityIds: string[]
+}
+
+interface HaEntity {
+  entity_id: string
+  state: string
+  attributes: Record<string, unknown>
+  last_changed?: string
+  last_updated?: string
+}
+
+interface HaEntitySummary {
+  entity_id: string
+  name: string
+  domain: string
+  state: string
+  unit: string | null
+  deviceClass: string | null
 }
 
 interface RingCameraInfo {

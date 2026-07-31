@@ -3,6 +3,7 @@ import * as http from 'http'
 import { randomBytes, createHash } from 'crypto'
 import { AddressInfo } from 'net'
 import Store from 'electron-store'
+import { protect, unprotectAndUpgrade } from './secure-store'
 
 // ---------------------------------------------------------------------------
 // OAuth credentials are injected at build time via Vite's `define` from
@@ -290,12 +291,12 @@ export async function beginAuthFlow(): Promise<GoogleAccount> {
     const tokens = await exchangeCodeForTokens(code, redirectUri, verifier)
     const userInfo = await fetchUserInfo(tokens.access_token)
 
-    // Persist refresh token, prime the access-token cache
+    // Persist refresh token (encrypted at rest), prime the access-token cache
     const records = accountsStore.get('accounts')
     records[userInfo.email] = {
       email: userInfo.email,
       name: userInfo.name,
-      refreshToken: tokens.refresh_token,
+      refreshToken: protect(tokens.refresh_token),
       addedAt: new Date().toISOString()
     }
     accountsStore.set('accounts', records)
@@ -322,7 +323,20 @@ export async function getAccessToken(email: string): Promise<string> {
   const account = records[email]
   if (!account) throw new Error(`No connected Google account for ${email}`)
 
-  const refreshed = await refreshAccessToken(account.refreshToken)
+  // Decrypt, migrating any token stored before encryption was introduced.
+  const { value: refreshToken, upgraded } = unprotectAndUpgrade(account.refreshToken)
+  if (upgraded) {
+    records[email] = { ...account, refreshToken: upgraded }
+    accountsStore.set('accounts', records)
+    console.log(`[google-auth] Migrated ${email} refresh token to encrypted storage`)
+  }
+  if (!refreshToken) {
+    throw new Error(
+      `Stored Google credentials for ${email} could not be read — reconnect the account.`
+    )
+  }
+
+  const refreshed = await refreshAccessToken(refreshToken)
   accessTokenCache.set(email, {
     token: refreshed.access_token,
     expiresAt: Date.now() + (refreshed.expires_in - 60) * 1000

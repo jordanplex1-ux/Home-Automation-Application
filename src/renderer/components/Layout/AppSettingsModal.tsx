@@ -11,6 +11,7 @@ import { DevPanel } from './DevPanel'
 import { EditLockSettings } from './EditLockSettings'
 import { LayoutPresetManager } from './LayoutPresetManager'
 import { RingSettings } from './RingSettings'
+import { HomeAssistantSettings } from './HomeAssistantSettings'
 import { RELEASE_NOTES } from '../../data/releaseNotes'
 
 interface AppSettingsModalProps {
@@ -381,6 +382,14 @@ export function AppSettingsModal({ open, onClose }: AppSettingsModalProps) {
                 Google Calendar
               </label>
               <GoogleCalendarSettings />
+            </div>
+
+            {/* Home Assistant */}
+            <div>
+              <label className="text-xs text-text-secondary mb-2 block uppercase tracking-wider">
+                Home Assistant
+              </label>
+              <HomeAssistantSettings />
             </div>
 
             {/* Ring cameras */}

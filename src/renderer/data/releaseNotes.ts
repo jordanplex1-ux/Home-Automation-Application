@@ -20,6 +20,35 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '0.2.0',
+    date: '2026-07-31',
+    sections: [
+      {
+        title: 'New',
+        items: [
+          'Home Assistant integration — connect your HA server (Settings → System) and your sensors and controls appear on the Home Automation screen',
+          'Live updates over a WebSocket connection: readings refresh the instant they change in Home Assistant, no polling',
+          'Tap-to-toggle tiles for lights, switches and fans; sensor tiles pick their own icon and units automatically',
+          'Entity picker — search everything Home Assistant knows about and choose exactly what appears on the wall',
+          'Automatic reconnection, so the wall panel can boot before the Home Assistant box and simply find it when it comes up'
+        ]
+      },
+      {
+        title: 'Security',
+        items: [
+          'Saved credentials (Home Assistant, Ring and Google) are now encrypted using the operating system keystore rather than stored as plain text — existing logins are upgraded automatically, no need to sign in again'
+        ]
+      },
+      {
+        title: 'Fixed',
+        items: [
+          'Notifications were appearing behind open settings windows, so actions like saving or testing a connection looked like they did nothing',
+          'Connection settings now explain what’s missing instead of silently doing nothing when a field is blank, and show the result inline'
+        ]
+      }
+    ]
+  },
+  {
     version: '0.1.9',
     date: '2026-06-16',
     sections: [

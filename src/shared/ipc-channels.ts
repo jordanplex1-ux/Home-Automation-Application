@@ -31,5 +31,15 @@ export const IPC = {
   RING_LOGOUT: 'ring:logout',
   RING_LIST_CAMERAS: 'ring:list-cameras',
   RING_SNAPSHOT: 'ring:snapshot',
-  RING_EVENT: 'ring:event'
+  RING_EVENT: 'ring:event',
+  HA_STATUS: 'ha:status',
+  HA_GET_CONFIG: 'ha:get-config',
+  HA_SET_CONFIG: 'ha:set-config',
+  HA_TEST_CONNECTION: 'ha:test-connection',
+  HA_DISCONNECT: 'ha:disconnect',
+  HA_GET_STATES: 'ha:get-states',
+  HA_LIST_ENTITIES: 'ha:list-entities',
+  HA_CALL_SERVICE: 'ha:call-service',
+  HA_STATES: 'ha:states',
+  HA_STATE_CHANGED: 'ha:state-changed'
 } as const
