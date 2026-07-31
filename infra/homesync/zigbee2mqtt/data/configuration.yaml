@@ -1,0 +1,55 @@
+# Zigbee2MQTT — SONOFF ZBDongle-P (TI CC2652P)
+#
+# Schema note: this targets Zigbee2MQTT 2.x. A few keys moved in 2.0 (notably
+# `permit_join` was removed from this file — pairing is now driven from the
+# frontend/API, which is the safer default anyway). If Z2M refuses to start
+# citing an unknown key, check the docs for the exact version you pulled.
+
+# Publish MQTT discovery messages so every paired device appears in Home
+# Assistant automatically — no manual entity plumbing.
+homeassistant:
+  enabled: true
+
+mqtt:
+  base_topic: zigbee2mqtt
+  # Container-to-container over the `homesync` bridge network
+  server: mqtt://mosquitto:1883
+  user: '!secret mqtt_user'
+  password: '!secret mqtt_password'
+
+serial:
+  # Mapped from /dev/serial/by-id/... in docker-compose.yml
+  port: /dev/ttyUSB0
+  # ZBDongle-P is TI CC2652P -> zstack. (ZBDongle-E / MG24 would be `ember`.)
+  adapter: zstack
+
+advanced:
+  # Generate fresh, random network credentials on first run. Never ship the
+  # well-known defaults — the network key is the only thing standing between
+  # your mesh and a passer-by with an SDR.
+  network_key: GENERATE
+  pan_id: GENERATE
+  ext_pan_id: GENERATE
+
+  # Zigbee channel 25 sits above the common 2.4GHz WiFi channels (1/6/11).
+  # Changing this later forces every device to re-pair, so pick it now.
+  channel: 25
+
+  # The CC2652P has a power amplifier — run it at full tilt for range.
+  transmit_power: 20
+
+  log_level: info
+
+# Per-device online/offline tracking. Useful on the wall panel so a dead
+# battery shows as "unavailable" rather than a silently stale reading.
+availability:
+  enabled: true
+
+frontend:
+  enabled: true
+  port: 8080
+
+# Optional: give devices friendly names as you pair them, e.g.
+# devices:
+#   '0x00124b00xxxxxxxx':
+#     friendly_name: hallway_thp

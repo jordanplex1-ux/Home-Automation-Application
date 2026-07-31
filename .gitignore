@@ -18,3 +18,15 @@ release/
 
 *.log
 .exe
+
+# HomeSync stack (infra/homesync) — commit the templates, never the runtime
+# state or credentials.
+infra/homesync/mosquitto/config/passwd
+infra/homesync/mosquitto/data/
+infra/homesync/mosquitto/log/
+infra/homesync/zigbee2mqtt/data/secret.yaml
+infra/homesync/zigbee2mqtt/data/database.db*
+infra/homesync/zigbee2mqtt/data/state.json
+infra/homesync/zigbee2mqtt/data/coordinator_backup.json
+infra/homesync/zigbee2mqtt/data/log/
+infra/homesync/homeassistant/config/

@@ -1,0 +1,64 @@
+name: homesync
+
+# HomeSync automation stack: Mosquitto (broker) -> Zigbee2MQTT (radio) -> Home
+# Assistant (hub). Runs on the dedicated Ubuntu Server box sited centrally in
+# the house. The Home Planner wall panel is only a client of HA's API — it is
+# deliberately NOT part of this stack.
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    restart: unless-stopped
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    ports:
+      # Bound to the host so Home Assistant (host networking) can reach it on
+      # 127.0.0.1:1883. Restrict exposure at the firewall, not here.
+      - "1883:1883"
+    networks: [homesync]
+
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt:latest
+    container_name: zigbee2mqtt
+    restart: unless-stopped
+    depends_on: [mosquitto]
+    environment:
+      - TZ=Europe/London
+    volumes:
+      - ./zigbee2mqtt/data:/app/data
+      - /run/udev:/run/udev:ro
+    devices:
+      # SONOFF ZBDongle-P (CC2652P). ALWAYS use the /dev/serial/by-id/ path —
+      # /dev/ttyUSB0 is assigned in enumeration order and will move on you.
+      # Find yours with:  ls -l /dev/serial/by-id/
+      - /dev/serial/by-id/usb-ITEAD_SONOFF_Zigbee_3.0_USB_Dongle_Plus_CHANGE_ME-if00-port0:/dev/ttyUSB0
+    ports:
+      - "8080:8080"
+    networks: [homesync]
+
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    restart: unless-stopped
+    depends_on: [mosquitto]
+    environment:
+      - TZ=Europe/London
+    volumes:
+      - ./homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    # Host networking so mDNS/SSDP discovery works (Hue, Chromecast, printers,
+    # etc.). Note: this means HA reaches the broker at 127.0.0.1:1883, not
+    # mosquitto:1883, and it cannot also join the `homesync` bridge network.
+    #
+    # Deliberately NOT privileged — HA owns no USB hardware here (the Zigbee
+    # radio belongs to Zigbee2MQTT). Only add privileged/devices if you later
+    # give HA direct hardware such as Bluetooth.
+    network_mode: host
+
+networks:
+  homesync:
+    driver: bridge
